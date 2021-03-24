@@ -5,6 +5,7 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
+    "format:check": "prettier --check 'src/**/*.{js,vue}'",
     "lint": "eslint 'src/**/*.{js,vue}'",
     "test": "jest"
   },

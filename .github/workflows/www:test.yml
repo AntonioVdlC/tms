@@ -1,0 +1,20 @@
+name: www:test
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14.x
+      run: npm ci
+    - name: Lint & Format
+      run: npm run format:check
+      run: npm run lint
+    - name: Unit tests
+      run: npm test
