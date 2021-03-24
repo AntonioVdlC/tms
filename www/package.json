@@ -5,6 +5,7 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
+    "lint": "eslint 'src/**/*.{js,vue}'",
     "test": "jest"
   },
   "dependencies": {
