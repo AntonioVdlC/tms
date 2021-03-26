@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   props: {
     msg: {
@@ -28,14 +30,14 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      count: 0,
-    };
+  computed: {
+    ...mapGetters({
+      count: "counter/count",
+    }),
   },
   methods: {
     increment() {
-      this.count++;
+      this.$store.dispatch({ type: "counter/increment", payload: {} });
     },
   },
 };

@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "module": "esnext",
-    "target": "esnext"
+    "target": "esnext",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src/**/*"]
 }
