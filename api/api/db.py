@@ -1,6 +1,8 @@
 from flask import current_app, g
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, ForeignKey, DateTime, Enum
 
+#THIS IS BS PLACEHOLDER COPIED RANDOMLY FROM DOC. DON'T USE IT IDIOT
+
 
 def init_db():
     if 'db' not in g:

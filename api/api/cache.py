@@ -1,10 +1,18 @@
 import redis
-from flask import current_app, g
+from flask import current_app
+
+r: redis.Redis = None
 
 
 def init_cache():
-    if 'cache' not in g:
+    global r
+    if r is None:
+        current_app.logger.info("setting cache..")
         r = redis.Redis(host=current_app.config['REDIS_HOST'],
                         port=current_app.config['REDIS_PORT'],
                         db=current_app.config['REDIS_DB'])
-        g.cache = r
+
+
+def get_cache():
+    global r
+    return r
