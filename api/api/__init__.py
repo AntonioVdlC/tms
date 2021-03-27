@@ -1,7 +1,6 @@
 from flask import Flask, jsonify
-from api.db import init_db
-from api.cache import init_cache, get_cache
-from api.log import init_log
+from api.utils.cache import init_cache, get_cache
+from api.utils.log import init_log
 
 
 def create_app(test_config=None):
