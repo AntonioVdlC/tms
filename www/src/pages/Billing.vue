@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header :crumbs="crumbs" />
-    Home
+    Billing
   </div>
 </template>
 
@@ -18,6 +18,10 @@ export default {
         {
           path: "/",
           name: "Home",
+        },
+        {
+          path: "/billing",
+          name: "Billing",
         },
       ];
     },

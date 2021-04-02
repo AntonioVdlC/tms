@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header :crumbs="crumbs" />
-    Home
+    Profile {{ userId }}
   </div>
 </template>
 
@@ -12,12 +12,22 @@ export default {
   components: {
     Header,
   },
+  props: {
+    userId: {
+      type: String,
+      required: true,
+    },
+  },
   computed: {
     crumbs() {
       return [
         {
           path: "/",
           name: "Home",
+        },
+        {
+          path: `/profile/${this.userId}`,
+          name: "Profile",
         },
       ];
     },

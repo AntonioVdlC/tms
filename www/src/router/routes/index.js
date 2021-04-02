@@ -5,6 +5,49 @@ const routes = [
     component: () => import("@/pages/Home.vue"),
   },
   {
+    path: "/profile/:userId",
+    props: true,
+    name: "Profile",
+    component: () => import("@/pages/Profile.vue"),
+  },
+  {
+    path: "/team",
+    name: "Team",
+    component: () => import("@/pages/Team.vue"),
+  },
+  {
+    path: "/projects",
+    name: "Projects",
+    component: () => import("@/pages/Projects.vue"),
+  },
+  {
+    path: "/project/:projectId",
+    props: true,
+    name: "Project",
+    component: () => import("@/pages/Project.vue"),
+  },
+  {
+    path: "/project/:projectId/segment/:segmentId",
+    props: true,
+    name: "Segment",
+    component: () => import("@/pages/Segment.vue"),
+  },
+  {
+    path: "/reports",
+    name: "Reports",
+    component: () => import("@/pages/Reports.vue"),
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    component: () => import("@/pages/Settings.vue"),
+  },
+  {
+    path: "/billing",
+    name: "Billing",
+    component: () => import("@/pages/Billing.vue"),
+  },
+  {
     path: "/:pathMatch(.*)",
     name: "NotFound",
     component: () => import("@/pages/NotFound.vue"),
