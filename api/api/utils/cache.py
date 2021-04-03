@@ -9,8 +9,8 @@ def init_cache():
     if _r is None:
         current_app.logger.info("Setting up cache..")
         _r = redis.Redis(host=current_app.config['REDIS_HOST'],
-                        port=current_app.config['REDIS_PORT'],
-                        db=current_app.config['REDIS_DB'])
+                         port=current_app.config['REDIS_PORT'],
+                         db=current_app.config['REDIS_DB'])
 
 
 def get_cache():
