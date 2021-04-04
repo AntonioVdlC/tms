@@ -11,7 +11,7 @@ def init_db():
         _db = MongoClient(current_app.config['MONGO_HOST'])
 
 
-def get_db():
+def get_db() -> MongoClient:
     global _db
     return _db
 

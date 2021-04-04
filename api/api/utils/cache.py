@@ -13,6 +13,6 @@ def init_cache():
                          db=current_app.config['REDIS_DB'])
 
 
-def get_cache():
+def get_cache() -> redis.Redis:
     global _r
     return _r
