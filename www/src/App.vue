@@ -29,5 +29,13 @@ export default {
       ],
     };
   },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      this.$store.dispatch("user/getCurrent");
+    },
+  },
 };
 </script>

@@ -12,6 +12,9 @@ const api = {
           id: "123",
           name: "Some Buddy",
           initials: "SB",
+          organisation: {
+            id: 321,
+          },
         };
         break;
 
@@ -44,6 +47,18 @@ const api = {
           },
         ];
         break;
+
+      case "/organisations":
+        data = [
+          {
+            id: 123,
+            name: "Organisation 1",
+          },
+          {
+            id: 321,
+            name: "Organisation 2",
+          },
+        ];
     }
 
     return Promise.resolve({ data });

@@ -2,6 +2,7 @@
   <header class="flex items-center">
     <Breadcrumbs :crumbs="crumbs" />
     <span class="flex-grow">&nbsp;</span>
+    <OrganisationSelector class="mr-8" />
     <ProfilePicture
       class="cursor-pointer"
       :user="user"
@@ -15,11 +16,13 @@
 import { mapGetters } from "vuex";
 
 import Breadcrumbs from "@/components/Breadcrumbs.vue";
+import OrganisationSelector from "@/components/OrganisationSelector.vue";
 import ProfilePicture from "@/components/ProfilePicture.vue";
 
 export default {
   components: {
     Breadcrumbs,
+    OrganisationSelector,
     ProfilePicture,
   },
   props: {
