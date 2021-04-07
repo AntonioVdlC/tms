@@ -2,15 +2,20 @@
   <div>
     <Header :crumbs="crumbs" />
     Project List
+    <ProjectList />
   </div>
 </template>
 
 <script>
 import Header from "@/components/Header.vue";
 
+import ProjectList from "@/components/ProjectList.vue";
+
 export default {
   components: {
     Header,
+
+    ProjectList,
   },
   computed: {
     crumbs() {

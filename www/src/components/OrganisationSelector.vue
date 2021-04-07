@@ -19,7 +19,6 @@ export default {
     }),
     value: {
       get() {
-        console.log({ ...this.user });
         return this.user.organisation.id;
       },
       set(id) {

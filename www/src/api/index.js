@@ -6,6 +6,8 @@ const api = {
   get(url) {
     let data = {};
 
+    const orgId = 123;
+
     switch (url) {
       case "/user":
         data = {
@@ -13,7 +15,7 @@ const api = {
           name: "Some Buddy",
           initials: "SB",
           organisation: {
-            id: 321,
+            id: orgId,
           },
         };
         break;
@@ -59,6 +61,20 @@ const api = {
             name: "Organisation 2",
           },
         ];
+        break;
+
+      case `/organisation/${orgId}/projects`:
+        data = [
+          {
+            id: 2,
+            name: "Mobile",
+          },
+          {
+            id: 24,
+            name: "Web",
+          },
+        ];
+        break;
     }
 
     return Promise.resolve({ data });

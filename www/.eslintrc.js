@@ -11,5 +11,7 @@ module.exports = {
     sourceType: "module",
   },
   plugins: ["jest", "vue"],
-  rules: {},
+  rules: {
+    "no-console": "error",
+  },
 };
