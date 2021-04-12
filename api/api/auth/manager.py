@@ -2,6 +2,7 @@ from flask import current_app
 from pydantic import BaseModel, EmailStr, validator
 import mmh3
 from pymongo.errors import DuplicateKeyError
+from redis.exceptions import ConnectionError, TimeoutError
 
 import uuid
 import json
@@ -104,6 +105,14 @@ def callback(request: CallbackRequest) -> AuthTokenResponse:
         set_auth_token(auth_token, user_id)
         delete_token_email(email, request.token)
         return AuthTokenResponse(token=auth_token)
+
+
+def logout(token: str):
+    try:
+        current_app.logger.info(f"Deleting user token: {token}")
+        get_cache().delete(token)
+    except (ConnectionError, TimeoutError) as e:
+        raise LogoutException(token)
 
 
 def generate_email_hash(email: str) -> str:

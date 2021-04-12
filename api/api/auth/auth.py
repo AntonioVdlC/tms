@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, request, jsonify, escape
 from pydantic import ValidationError
 
 from api.auth import manager
-from api.auth.exceptions import DuplicateSignupException, UnknownEmailException, InvalidNameException
+from api.auth.exceptions import DuplicateSignupException, UnknownEmailException, LogoutException
 
 blueprint = Blueprint('auth', __name__, url_prefix='/auth', template_folder='templates')
 
@@ -50,3 +50,17 @@ def callback():
     except DuplicateSignupException as e:
         current_app.logger.warn(f'Duplicate sign up request for {e.email}')
         return jsonify({"error": f"User already exists for email {e.email}. Please try logging in", "code": 40002}), 400
+
+
+@blueprint.route('/logout', methods=['POST'])
+def logout():
+    try:
+        token = request.headers.get('Authorization').split()[1]
+        manager.logout(token)
+        return jsonify({"message": "Logged out user"})
+    except AttributeError as e:
+        return jsonify({"message": "Missing Authorization header", "code": 40004}), 400
+    except IndexError as e:
+        return jsonify({"message": "Illegal token format", "code": 40001}), 400
+    except LogoutException as e:
+        return jsonify({"message": "Redis connection issue", "code": 50001}), 500
