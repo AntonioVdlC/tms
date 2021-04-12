@@ -44,7 +44,10 @@ def callback():
     try:
         callback_request = manager.CallbackRequest(**request.json)
         callback_response = manager.callback(callback_request)
-        return jsonify(callback_response.dict())
+        response = jsonify({"message": "you are in homer"})
+        access_token = f'Bearer {callback_response.token}'
+        response.set_cookie('access_token', access_token)
+        return response
     except ValidationError as e:
         return jsonify({"error": "Illegal json parameters", "code": 40004}), 400
     except DuplicateSignupException as e:
@@ -55,9 +58,11 @@ def callback():
 @blueprint.route('/logout', methods=['POST'])
 def logout():
     try:
-        token = request.headers.get('Authorization').split()[1]
+        token = request.cookies.get('access_token').split()[1]
         manager.logout(token)
-        return jsonify({"message": "Logged out user"})
+        response = jsonify({"message": "Logged out user"})
+        response.delete_cookie('access_token')
+        return response
     except AttributeError as e:
         return jsonify({"message": "Missing Authorization header", "code": 40004}), 400
     except IndexError as e:
