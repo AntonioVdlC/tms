@@ -109,7 +109,6 @@ def callback(request: CallbackRequest) -> AuthTokenResponse:
 
 def logout(token: str):
     try:
-        current_app.logger.info(f"Deleting user token: {token}")
         get_cache().delete(token)
     except (ConnectionError, TimeoutError) as e:
         raise LogoutException(token)

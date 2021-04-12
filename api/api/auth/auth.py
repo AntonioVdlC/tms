@@ -46,7 +46,10 @@ def callback():
         callback_response = manager.callback(callback_request)
         response = jsonify({"message": "you are in homer"})
         access_token = f'Bearer {callback_response.token}'
-        response.set_cookie('access_token', access_token)
+        if current_app.config['ENV'] == 'development':
+            response.set_cookie('access_token', access_token)
+        else:
+            response.set_cookie('access_token', access_token, secure=True, httponly=True)
         return response
     except ValidationError as e:
         return jsonify({"error": "Illegal json parameters", "code": 40004}), 400
