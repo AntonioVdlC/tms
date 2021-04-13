@@ -12,7 +12,8 @@ def init_cache():
         current_app.logger.info("Setting up cache..")
         _r = redis.Redis(host=current_app.config['REDIS_HOST'],
                          port=current_app.config['REDIS_PORT'],
-                         db=current_app.config['REDIS_DB'])
+                         db=current_app.config['REDIS_DB'],
+                         decode_responses=True)
 
         token_generation_lua = """
         local old_token = redis.call('GET', KEYS[1])
