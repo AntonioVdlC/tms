@@ -1,0 +1,18 @@
+services:
+  api:
+    build: .
+    ports:
+      - 8000:8000
+    links:
+      - redis
+      - mongo
+    environment:
+      - CONFIG_FILE_PATH=settings.cfg
+    volumes:
+    - ./instance:/api/instance
+  redis:
+    image: redis
+  mongo:
+    image: mongo
+    volumes:
+    - ./data:/data/db
