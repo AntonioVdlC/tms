@@ -8,6 +8,7 @@ services:
       - mongo
     environment:
       - CONFIG_FILE_PATH=settings.cfg
+      - FLASK_ENV=development
     volumes:
     - ./instance:/api/instance
   redis:

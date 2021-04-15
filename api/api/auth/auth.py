@@ -47,6 +47,7 @@ def callback():
         response = jsonify({"message": "you are in homer"})
         access_token = f'Bearer {callback_response.token}'
         if current_app.config['ENV'] == 'development':
+            current_app.logger.info("env is development")
             response.set_cookie('access_token', access_token)
         else:
             response.set_cookie('access_token', access_token, secure=True, httponly=True)
