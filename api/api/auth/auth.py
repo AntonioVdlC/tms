@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, request, jsonify, escape
 from pydantic import ValidationError
 
 from api.auth import manager
-from api.auth.exceptions import DuplicateSignupException, UnknownEmailException, LogoutException
+from api.auth.exceptions import *
 
 blueprint = Blueprint('auth', __name__, url_prefix='/auth', template_folder='templates')
 
@@ -57,6 +57,9 @@ def callback():
     except DuplicateSignupException as e:
         current_app.logger.warn(f'Duplicate sign up request for {e.email}')
         return jsonify({"error": f"User already exists for email {e.email}. Please try logging in", "code": 40002}), 400
+    except InvalidOperationException as e:
+        current_app.logger.warn('Invalid operation in request')
+        return jsonify({"error": e.msg, "code": 40005}), 400
 
 
 @blueprint.route('/logout', methods=['POST'])

@@ -97,9 +97,12 @@ def callback(request: CallbackRequest) -> AuthTokenResponse:
                 raise DuplicateSignupException(email)
             user_id = str(user.object_id)
         elif request.operation == Operation.login:
-            user_id = str(user_info['object_id'])
+            try:
+                user_id = str(user_info['object_id'])
+            except KeyError as e:
+                raise InvalidOperationException("Not a login token")
         else:
-            raise InvalidOperationException(str(request.operation))
+            raise InvalidOperationException(f'Unknown operation: {request.operation}')
         auth_token = str(uuid.uuid4())
         current_app.logger.info(f"auth_token: {auth_token}, object_id: {user_id}")
         set_auth_token(auth_token, user_id)

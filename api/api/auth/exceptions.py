@@ -24,8 +24,8 @@ class InvalidTokenException(Exception):
 
 
 class InvalidOperationException(Exception):
-    def __init__(self, operation: str):
-        self.operation = operation
+    def __init__(self, msg: str):
+        self.msg = msg
 
 
 class LogoutException(Exception):

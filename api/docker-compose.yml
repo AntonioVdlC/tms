@@ -15,5 +15,8 @@ services:
     image: redis
   mongo:
     image: mongo
+    environment:
+      - MONGO_INITDB_DATABASE=tms
     volumes:
     - ./data:/data/db
+    - ./scripts:/docker-entrypoint-initdb.d
