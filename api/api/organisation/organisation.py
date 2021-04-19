@@ -2,6 +2,7 @@ from flask import Blueprint, current_app, request, jsonify, escape, g
 from pydantic import ValidationError
 
 from api.organisation import manager
+from api.organisation.exceptions import *
 
 
 blueprint = Blueprint('organisation', __name__, url_prefix='/organisations')
@@ -16,4 +17,6 @@ def create_organisation():
         return jsonify(create_organisation_response.dict())
     except ValidationError as e:
         current_app.logger.error('Issue with json body')
-        return jsonify({"error": f"Issue creating organisation with given name", "code": 40006}), 400
+        return jsonify({"error": "Issue creating organisation with given name", "code": 40006}), 400
+    except OrganisationCreationException as e:
+        return jsonify({"error": "Issue creating organisation due to mongo reasons", "code": 50002}), 500
