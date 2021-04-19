@@ -8,9 +8,8 @@ import uuid
 import json
 from enum import Enum
 
-from api.utils.db import get_db
 from api.utils.cache import get_cache, get_token_generation_script
-from api.models.user import User, get_user_by_email, insert_user
+from api.models.user import get_user_by_email, insert_user
 from api.auth.exceptions import *
 
 

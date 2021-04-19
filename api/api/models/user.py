@@ -23,7 +23,7 @@ class User(object):
 
 
 def get_user_by_email(email: str) -> User:
-    user_dict = get_db().tms.users.find_one({"email": email})
+    user_dict = get_db().users.find_one({"email": email})
     if user_dict is None:
         return None
     else:
@@ -35,8 +35,12 @@ def get_user_by_email(email: str) -> User:
 
 def insert_user(email: str, first_name: str, last_name: str) -> User:
     created_at = updated_at = datetime.utcnow()
-    result: InsertOneResult = get_db().tms.users.insert_one({"email": email, "first_name": first_name,
-                                                             "last_name": last_name, "created_at": created_at,
-                                                             "updated_at": updated_at})
+    result: InsertOneResult = get_db().users.insert_one({"email": email, "first_name": first_name,
+                                                         "last_name": last_name, "created_at": created_at,
+                                                         "updated_at": updated_at})
     return User(object_id=result.inserted_id, email=email, first_name=first_name,
                 last_name=last_name, created_at=created_at, updated_at=updated_at)
+
+
+def add_organisation_to_user(user_id: str, org_id: str):
+    get_db().users.update_one({'_id': ObjectId(user_id)}, {'$push': {'organisations': org_id}})

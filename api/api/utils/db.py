@@ -13,5 +13,5 @@ def init_db():
 
 def get_db() -> MongoClient:
     global _db
-    return _db
+    return _db.tms
 

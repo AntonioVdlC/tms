@@ -36,7 +36,7 @@ def create_app(test_config=None):
     @app.route("/ping")
     def ping():
         app.logger.info(get_cache().ping())
-        app.logger.info(get_db().tms.command('ping'))
+        app.logger.info(get_db().command('ping'))
         return jsonify({"message": "pong"})
 
     return app
