@@ -42,5 +42,5 @@ def insert_user(email: str, first_name: str, last_name: str) -> User:
                 last_name=last_name, created_at=created_at, updated_at=updated_at)
 
 
-def add_organisation_to_user(user_id: str, org_id: str):
-    get_db().users.update_one({'_id': ObjectId(user_id)}, {'$push': {'organisations': org_id}})
+def add_organisation_to_user(user_id: str, org_id: str, session):
+    get_db().users.update_one({'_id': ObjectId(user_id)}, {'$push': {'organisations': org_id}}, session=session)

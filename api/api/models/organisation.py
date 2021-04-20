@@ -40,14 +40,13 @@ class Organisation(object):
                              "creator_id": self.creator_id, "created_at": self.created_at,
                              "updated_at": self.updated_at, "is_deleted": self.is_deleted}
         if self.object_id is not None:
-            organisation_dict['object_id'] = str(self.object_id)
+            organisation_dict['_id'] = self.object_id
         return organisation_dict
 
 
-def insert_organisation(name: str, creator_id: str):
+def insert_organisation(name: str, creator_id: str, object_id: ObjectId, session):
     created_at = updated_at = added_at = datetime.utcnow()
     members = [Member(creator_id, MemberType.admin, added_at)]
-    organisation = Organisation(name, members, creator_id, created_at, updated_at, False)
-    result: InsertOneResult = get_db().organisations.insert_one(organisation.as_dict())
-    organisation.object_id = result.inserted_id
+    organisation = Organisation(name, members, creator_id, created_at, updated_at, False, object_id)
+    result: InsertOneResult = get_db().organisations.insert_one(organisation.as_dict(), session=session)
     return organisation
