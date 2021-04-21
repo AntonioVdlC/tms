@@ -1,5 +1,20 @@
 const routes = [
   {
+    path: "/login",
+    name: "Login",
+    component: () => import("@/pages/Login.vue"),
+  },
+  {
+    path: "/auth/callback",
+    name: "AuthCallback",
+    component: () => import("@/pages/AuthCallback.vue"),
+  },
+  {
+    path: "/logout",
+    name: "Logout",
+    component: () => import("@/pages/Logout.vue"),
+  },
+  {
     path: "/",
     name: "Home",
     component: () => import("@/pages/Home.vue"),

@@ -1,5 +1,6 @@
 import { createStore, createLogger } from "vuex";
 
+import auth from "@/store/modules/auth";
 import organisation from "@/store/modules/organisation";
 import project from "@/store/modules/project";
 import segment from "@/store/modules/segment";
@@ -9,6 +10,7 @@ const debug = process.env.NODE_ENV !== "production";
 
 export default createStore({
   modules: {
+    auth,
     organisation,
     project,
     segment,
