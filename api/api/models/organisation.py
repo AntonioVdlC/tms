@@ -19,8 +19,21 @@ class Member(object):
         self.member_type = member_type
         self.added_at = added_at
 
-    def as_dict(self):
-        return {"user_id": self.user_id, "member_type": self.member_type.value, "added_at": self.added_at}
+    def as_dict(self, to_cache=False):
+        if to_cache:
+            return {"user_id": self.user_id, "member_type": self.member_type.value,
+                    "added_at": self.added_at.strftime('%Y-%m-%d %H:%M:%S.%f')}
+        else:
+            return {"user_id": self.user_id, "member_type": self.member_type.value, "added_at": self.added_at}
+
+    @staticmethod
+    def from_dict(member_dict, from_cache=False):
+        if from_cache:
+            return Member(user_id=member_dict['user_id'], member_type=MemberType[member_dict['member_type']],
+                          added_at=datetime.strptime(member_dict['added_at'], '%Y-%m-%d %H:%M:%S.%f'))
+        else:
+            return Member(user_id=member_dict['user_id'], member_type=MemberType[member_dict['member_type']],
+                          added_at=member_dict['added_at'])
 
 
 class Organisation(object):
@@ -34,14 +47,34 @@ class Organisation(object):
         self.updated_at = updated_at
         self.is_deleted = is_deleted
 
-    def as_dict(self):
+    def as_dict(self, to_cache=False):
         members_list = list(map(lambda member: member.as_dict(), self.members))
         organisation_dict = {"name": self.name, "members": members_list,
-                             "creator_id": self.creator_id, "created_at": self.created_at,
-                             "updated_at": self.updated_at, "is_deleted": self.is_deleted}
-        if self.object_id is not None:
+                             "creator_id": self.creator_id, "is_deleted": self.is_deleted}
+        if to_cache:
+            organisation_dict['_id'] = str(self.object_id)
+            organisation_dict['created_at'] = self.created_at.strftime('%Y-%m-%d %H:%M:%S.%f')
+            organisation_dict['updated_at'] = self.updated_at.strftime('%Y-%m-%d %H:%M:%S.%f')
+        else:
             organisation_dict['_id'] = self.object_id
+            organisation_dict['created_at'] = self.created_at
+            organisation_dict['updated_at'] = self.updated_at
         return organisation_dict
+
+    @staticmethod
+    def from_dict(organisation_dict, from_cache=False):
+        members = list(map(lambda member_dict: Member.from_dict(member_dict, from_cache), organisation_dict['members']))
+        if from_cache:
+            object_id = ObjectId(organisation_dict['_id'])
+            created_at = datetime.strptime(organisation_dict['created_at'], '%Y-%m-%d %H:%M:%S.%f')
+            updated_at = datetime.strptime(organisation_dict['updated_at'], '%Y-%m-%d %H:%M:%S.%f')
+            return Organisation(object_id=object_id, name=organisation_dict['name'], members=members,
+                                creator_id=organisation_dict['creator_id'], is_deleted=organisation_dict['is_deleted'],
+                                created_at=created_at, updated_at=updated_at)
+        else:
+            return Organisation(object_id=organisation_dict['_id'], name=organisation_dict['name'], members=members,
+                                creator_id=organisation_dict['creator_id'], is_deleted=organisation_dict['is_deleted'],
+                                created_at=organisation_dict['created_at'], updated_at=organisation_dict['updated_at'])
 
 
 def insert_organisation(name: str, creator_id: str, object_id: ObjectId, session):

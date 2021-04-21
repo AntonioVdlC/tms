@@ -62,7 +62,7 @@ def signup(request: SignupRequest):
         send_signup_email(signup_url)
         return {"message": "Please check email to complete sign up flow"}
     else:
-        current_app.logger.warn(f"Already an existing user for: {email}")
+        current_app.logger.warn(f"Already an existing user for: {email} with id: {existing_user.object_id}")
         raise DuplicateSignupException(email)
 
 
@@ -74,7 +74,8 @@ def login(request: LoginRequest):
         raise UnknownEmailException(email)
     else:
         token: str = generate_email_hash(email)
-        set_token(email, token, json.dumps(user.to_dict()))
+        user_dict = user.as_dict(to_cache=True)
+        set_token(email, token, json.dumps(user_dict))
         login_url = generate_callback_url(token, Operation.login.value)
         send_login_email(login_url)
         return {"message": "Please check email to login"}
@@ -97,7 +98,7 @@ def callback(request: CallbackRequest) -> AuthTokenResponse:
             user_id = str(user.object_id)
         elif request.operation == Operation.login:
             try:
-                user_id = str(user_info['object_id'])
+                user_id = str(user_info['_id'])
             except KeyError as e:
                 raise InvalidOperationException("Not a login token")
         else:
