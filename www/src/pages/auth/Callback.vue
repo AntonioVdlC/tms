@@ -8,7 +8,7 @@ export default {
       .dispatch({ type: "auth/callback", payload: { token, operation } })
       .then(() => {
         // TODO: success
-        this.$router.push("/");
+        this.$router.push("/app");
       })
       .catch(() => {
         // TODO: error handling

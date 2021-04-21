@@ -19,13 +19,13 @@ export default {
   data() {
     return {
       menu: [
-        { name: "Home", path: "/" },
-        { name: "Projects", path: "/projects" },
-        { name: "Team", path: "/team" },
-        { name: "Reports", path: "/reports" },
+        { name: "Home", path: "/app" },
+        { name: "Projects", path: "/app/projects" },
+        { name: "Team", path: "/app/team" },
+        { name: "Reports", path: "/app/reports" },
         { type: "space" },
-        { name: "Billing", path: "/billing" },
-        { name: "Settings", path: "/settings" },
+        { name: "Billing", path: "/app/billing" },
+        { name: "Settings", path: "/app/settings" },
       ],
     };
   },

@@ -71,7 +71,7 @@ export default {
       // TODO
     },
     goTo(project) {
-      this.$router.push(`/project/${project.id}`);
+      this.$router.push(`/app/project/${project.id}`);
     },
   },
 };
