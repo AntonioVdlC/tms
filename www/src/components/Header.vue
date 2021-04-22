@@ -42,7 +42,7 @@ export default {
         return;
       }
 
-      this.$router.push(`/profile/${this.user.id}`);
+      this.$router.push(`/app/profile/${this.user.id}`);
     },
   },
 };
