@@ -20,3 +20,25 @@ def create_organisation():
         return jsonify({"error": "Issue creating organisation with given name", "code": 40006}), 400
     except OrganisationCreationException as e:
         return jsonify({"error": "Issue creating organisation due to mongo reasons", "code": 50002}), 500
+
+
+@blueprint.route('', methods=['GET'])
+def get_organisations():
+    try:
+        organisations = manager.get_organisations_for_user(g.user_id)
+        return jsonify(organisations)
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exceptions", "code": 50003}), 500
+
+
+@blueprint.route('/<string:org_id>', methods=['GET'])
+def get_organisation(org_id: str):
+    try:
+        organisation = manager.get_organisation_for_user(org_id, g.user_id)
+        return jsonify(organisation)
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40401}), 404
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "No access to organisation", "code": 40101}), 401

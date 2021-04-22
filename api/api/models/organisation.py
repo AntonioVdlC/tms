@@ -48,7 +48,7 @@ class Organisation(object):
         self.is_deleted = is_deleted
 
     def as_dict(self, to_cache=False):
-        members_list = list(map(lambda member: member.as_dict(), self.members))
+        members_list = list(map(lambda member: member.as_dict(to_cache=to_cache), self.members))
         organisation_dict = {"name": self.name, "members": members_list,
                              "creator_id": self.creator_id, "is_deleted": self.is_deleted}
         if to_cache:
@@ -83,3 +83,19 @@ def insert_organisation(name: str, creator_id: str, object_id: ObjectId, session
     organisation = Organisation(name, members, creator_id, created_at, updated_at, False, object_id)
     result: InsertOneResult = get_db().organisations.insert_one(organisation.as_dict(), session=session)
     return organisation
+
+
+def get_organisation(object_id: str) -> Organisation:
+    org_dict = get_db().organisations.find_one({"_id": ObjectId(object_id)})
+    if org_dict is None:
+        return None
+    else:
+        return Organisation.from_dict(org_dict)
+
+
+def get_organisations(object_ids: list) -> list:
+    ids = list(map(lambda object_id: ObjectId(object_id), object_ids))
+    organisations = []
+    for org_dict in get_db().organisations.find({"_id": {"$in": ids}}):
+        organisations.append(Organisation.from_dict(org_dict))
+    return organisations
