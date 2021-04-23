@@ -23,3 +23,9 @@ class OrganisationIllegalAccessException(Exception):
 class UnknownSystemException(Exception):
     def __init__(self, user_id):
         self.user_id = user_id
+
+
+class DeletedOrganisationAccessException(Exception):
+    def __init__(self, user_id, org_id):
+        self.user_id = user_id
+        self.org_id = org_id

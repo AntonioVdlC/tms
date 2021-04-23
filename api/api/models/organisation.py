@@ -1,5 +1,6 @@
 from bson.objectid import ObjectId
-from pymongo.results import InsertOneResult
+from pymongo.results import InsertOneResult, UpdateResult
+from pymongo.write_concern import WriteConcern
 
 from datetime import datetime
 from enum import Enum
@@ -99,3 +100,20 @@ def get_organisations(object_ids: list) -> list:
     for org_dict in get_db().organisations.find({"_id": {"$in": ids}}):
         organisations.append(Organisation.from_dict(org_dict))
     return organisations
+
+
+def update_organisation(org_id: str, name: str) -> UpdateResult:
+    result: UpdateResult = get_db().organisations.with_options(write_concern=WriteConcern(w="majority")) \
+            .update_one({"_id": ObjectId(org_id)},
+                        {'$set': {'name': name,
+                                  'updated_at': datetime.utcnow()}},
+                        upsert=False)
+    return result
+
+
+def soft_delete_organisation(org_id: str) -> UpdateResult:
+    result: UpdateResult = get_db().organisations.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({"_id": ObjectId(org_id)},
+                    {'$set': {'is_deleted': True}},
+                    upsert=False)
+    return result
