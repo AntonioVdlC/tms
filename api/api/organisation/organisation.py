@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from api.organisation import manager
 from api.organisation.exceptions import *
+from api.commons.organisation import OrganisationNotFoundException, DeletedOrganisationAccessException
 
 
 blueprint = Blueprint('organisation', __name__, url_prefix='/organisations')

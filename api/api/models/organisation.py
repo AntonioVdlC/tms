@@ -50,8 +50,8 @@ class Organisation(object):
 
     def as_dict(self, to_cache=False):
         members_list = list(map(lambda member: member.as_dict(to_cache=to_cache), self.members))
-        organisation_dict = {"name": self.name, "members": members_list,
-                             "creator_id": self.creator_id, "is_deleted": self.is_deleted}
+        organisation_dict = {"name": self.name, "members": members_list, "creator_id": self.creator_id,
+                             "is_deleted": self.is_deleted}
         if to_cache:
             organisation_dict['_id'] = str(self.object_id)
             organisation_dict['created_at'] = self.created_at.strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -64,7 +64,8 @@ class Organisation(object):
 
     @staticmethod
     def from_dict(organisation_dict, from_cache=False):
-        members = list(map(lambda member_dict: Member.from_dict(member_dict, from_cache), organisation_dict['members']))
+        members = list(map(lambda member_dict: Member.from_dict(member_dict, from_cache),
+                           organisation_dict['members']))
         if from_cache:
             object_id = ObjectId(organisation_dict['_id'])
             created_at = datetime.strptime(organisation_dict['created_at'], '%Y-%m-%d %H:%M:%S.%f')

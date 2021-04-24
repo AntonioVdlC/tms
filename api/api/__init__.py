@@ -4,6 +4,7 @@ from api.utils.db import init_db, get_db
 from api.utils.log import init_log
 from api.auth import auth
 from api.organisation import organisation
+from api.project import project
 
 
 def create_app(test_config=None):
@@ -29,8 +30,10 @@ def create_app(test_config=None):
 
     app.register_blueprint(auth.blueprint)
     app.register_blueprint(organisation.blueprint)
+    app.register_blueprint(project.blueprint)
     app.before_request_funcs = {
-        'organisation': [before_request_auth]
+        'organisation': [before_request_auth],
+        'project': [before_request_auth]
     }
 
     @app.route("/ping")

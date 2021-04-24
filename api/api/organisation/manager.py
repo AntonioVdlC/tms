@@ -12,6 +12,8 @@ from api.organisation.exceptions import *
 from api.models.user import add_organisation_to_user, User, get_user_by_id
 from api.models.organisation import *
 from api.utils.db import get_client
+from api.commons import user as user_commons
+from api.commons import organisation as organisation_commons
 
 
 class OrganisationRequest(BaseModel):
@@ -48,7 +50,7 @@ def create_organisation(request: OrganisationRequest) -> OrganisationResponse:
             with session.start_transaction():
                 organisation = insert_organisation(organisation_name, g.user_id, object_id, session)
                 add_organisation_to_user(g.user_id, str(organisation.object_id), session)
-        clear_user_cache(g.user_id)
+        user_commons.clear_user_cache(g.user_id)
     except WriteError as we:
         current_app.logger.error(f'issue creating organisation, org name: {organisation_name}. creator_id: {g.user_id}')
         raise OrganisationCreationException(organisation_name, g.user_id)
@@ -61,26 +63,29 @@ def create_organisation(request: OrganisationRequest) -> OrganisationResponse:
 
 def get_organisations_for_user(user_id: str) -> list:
     try:
-        user = get_user(user_id)
-        organisations = list(filter(lambda org: not org.is_deleted, get_organisations_by_ids(user.organisations)))
-        response: list = \
-            list(map(lambda organisation: GetOrganisationResponse(organisation_name=organisation.name,
-                                                                  organisation_id=str(organisation.object_id),
-                                                                  created_at=organisation.created_at,
-                                                                  updated_at=organisation.updated_at,
-                                                                  is_deleted=organisation.is_deleted),
-                     organisations))
-        return response
+        user = user_commons.get_user(user_id)
+        if len(user.organisations) > 0:
+            organisations = list(filter(lambda org: not org.is_deleted, get_organisations_by_ids(user.organisations)))
+            response: list = \
+                list(map(lambda organisation: GetOrganisationResponse(organisation_name=organisation.name,
+                                                                      organisation_id=str(organisation.object_id),
+                                                                      created_at=organisation.created_at,
+                                                                      updated_at=organisation.updated_at,
+                                                                      is_deleted=organisation.is_deleted),
+                         organisations))
+            return response
+        else:
+            return []
     except (PyMongoError, RedisError) as e:
         raise UnknownSystemException(user_id)
 
 
 def get_organisation_for_user(organisation_id: str, user_id: str) -> GetOrganisationResponse:
-    organisation = get_organisation_by_id(organisation_id)
+    organisation = organisation_commons.get_organisation_by_id(organisation_id)
     if organisation.is_deleted:
-        raise DeletedOrganisationAccessException(user_id=user_id, org_id=organisation_id)
+        raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=organisation_id)
 
-    user = get_user(user_id)
+    user = user_commons.get_user(user_id)
 
     if organisation_id in user.organisations:
         current_app.logger.info('User has access to organisation..')
@@ -95,19 +100,20 @@ def get_organisation_for_user(organisation_id: str, user_id: str) -> GetOrganisa
 
 
 def edit_organisation(request: OrganisationRequest, organisation_id: str, user_id: str) -> OrganisationResponse:
-    organisation = get_organisation_by_id(organisation_id)
+    organisation = organisation_commons.get_organisation_by_id(organisation_id)
     if organisation.is_deleted:
-        raise DeletedOrganisationAccessException(user_id=user_id, org_id=organisation_id)
+        raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=organisation_id)
 
-    user = get_user(user_id)
+    user = user_commons.get_user(user_id)
 
-    if (str(organisation.object_id) in user.organisations) and check_if_admin(organisation, user_id):
+    if (str(organisation.object_id) in user.organisations) and \
+            organisation_commons.check_if_admin(organisation, user_id):
         current_app.logger.info('Editing organisation..')
         update_result = update_organisation(organisation_id, request.organisation_name)
         if update_result.modified_count != 1:
             raise UnknownSystemException(user_id)
-        clear_org_cache(organisation_id)
-        organisation = get_organisation_by_id(organisation_id)
+        organisation_commons.clear_org_cache(organisation_id)
+        organisation = organisation_commons.get_organisation_by_id(organisation_id)
         return OrganisationResponse(organisation_name=organisation.name,
                                     organisation_id=str(organisation.object_id),
                                     created_at=organisation.created_at)
@@ -116,34 +122,22 @@ def edit_organisation(request: OrganisationRequest, organisation_id: str, user_i
 
 
 def delete_organisation(organisation_id: str, user_id: str):
-    organisation = get_organisation_by_id(organisation_id)
+    organisation = organisation_commons.get_organisation_by_id(organisation_id)
     if organisation.is_deleted:
-        raise DeletedOrganisationAccessException(user_id=user_id, org_id=organisation_id)
+        raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=organisation_id)
 
-    user = get_user(user_id)
+    user = user_commons.get_user(user_id)
 
-    if (str(organisation.object_id) in user.organisations) and check_if_admin(organisation, user_id):
+    if (str(organisation.object_id) in user.organisations) and \
+            organisation_commons.check_if_admin(organisation, user_id):
         current_app.logger.info('Deleting organisation..')
         delete_result = soft_delete_organisation(organisation_id)
         if delete_result.modified_count != 1:
             raise UnknownSystemException(user_id)
-        clear_org_cache(organisation_id)
+        organisation_commons.clear_org_cache(organisation_id)
         return {"message": "organisation deleted"}
     else:
         raise OrganisationIllegalAccessException(organisation_id, user_id)
-
-
-def get_user(user_id: str) -> User:
-    key = f'user_{user_id}'
-    cached_user_str = get_cache().get(key)
-    user: User = None
-    if cached_user_str is None:
-        user = get_user_by_id(user_id)
-        get_cache().setex(key, current_app.config['CACHE_TTL_SECS'], json.dumps(user.as_dict(to_cache=True)))
-    else:
-        user_dict = json.loads(cached_user_str)
-        user = User.from_dict(user_dict, from_cache=True)
-    return user
 
 
 def get_organisations_by_ids(org_ids: list):
@@ -167,36 +161,3 @@ def get_organisations_by_ids(org_ids: list):
     organisations = cached_organisations + uncached_organisations
     return organisations
 
-
-def get_organisation_by_id(org_id: str) -> Organisation:
-    key = f'org_{org_id}'
-    cached_org_str = get_cache().get(key)
-    organisation: Organisation = None
-    if cached_org_str is None:
-        organisation = get_organisation(org_id)
-        if organisation is None:
-            raise OrganisationNotFoundException(org_id)
-        get_cache().setex(key, current_app.config['CACHE_TTL_SECS'], json.dumps(organisation.as_dict(to_cache=True)))
-    else:
-        org_dict = json.loads(cached_org_str)
-        organisation = Organisation.from_dict(org_dict, from_cache=True)
-    return organisation
-
-
-def check_if_admin(organisation, user_id) -> bool:
-    flag = False
-    for member in organisation.members:
-        if (member.user_id == user_id) and (member.member_type == MemberType.admin):
-            flag = True
-            break
-    return flag
-
-
-def clear_user_cache(user_id: str):
-    key = f'user_{user_id}'
-    get_cache().delete(key)
-
-
-def clear_org_cache(org_id: str):
-    key = f'org_{org_id}'
-    get_cache().delete(key)
