@@ -1,34 +1,32 @@
 <template>
   <div>
     <nav
-      class="flex justify-center pt-2 pb-2 pl-4 pr-4 sticky top-0 bg-white bg-opacity-75 backdrop-blur-sm border-gray-300 border-b"
+      class="px-4 py-2 sticky top-0 bg-white bg-opacity-75 backdrop-blur-sm border-gray-300 border-b"
     >
-      <div class="flex flex-grow max-w-5xl">
+      <div class="flex max-w-5xl mx-auto">
         <a href="/">TMS</a>
 
         <span class="flex-grow"></span>
 
-        <a href="/#/auth/login" class="pl-4 pr-4 mr-2">Login</a>
+        <a href="/auth/login" class="px-4 mr-2">Login</a>
         <a
-          href="/#/auth/signup"
-          class="pl-4 pr-4 transition-colors bg-yellow-300 rounded hover:bg-yellow-400"
+          href="/auth/signup"
+          class="px-4 transition-colors bg-yellow-300 rounded hover:bg-yellow-400"
         >
           Signup
         </a>
       </div>
     </nav>
 
-    <main class="min-h-screen flex justify-center pt-2 pb-2 pl-4 pr-4">
-      <div class="flex flex-grow max-w-5xl">
+    <main class="min-h-screen px-4 py-2">
+      <div class="max-w-5xl mx-auto">
         <router-view></router-view>
       </div>
     </main>
 
-    <footer
-      class="flex justify-center pt-4 pb-8 pl-4 pr-4 border-gray-300 border-t"
-    >
-      <div class="flex flex-grow max-w-5xl">
-        <div class="flex-grow text-left">
+    <footer class="pt-4 pb-8 px-4 border-gray-300 border-t">
+      <div class="flex max-w-5xl mx-auto justify-between">
+        <div class="text-left">
           <h3 class="text-lg font-bold">TMS</h3>
           <p>Software translation made easy!</p>
         </div>
@@ -79,6 +77,7 @@ export default {
 
     const lang = ref("en");
     const setLang = (value) => {
+      // TODO: refresh screen with new languages
       lang.value = value;
     };
 
