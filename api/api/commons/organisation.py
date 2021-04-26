@@ -17,6 +17,12 @@ class DeletedOrganisationAccessException(Exception):
         self.org_id = org_id
 
 
+class OrganisationIllegalAccessException(Exception):
+    def __init__(self, org_id, user_id):
+        self.org_id = org_id
+        self.user_id = user_id
+
+
 def get_organisation_by_id(org_id: str) -> Organisation:
     key = f'org_{org_id}'
     cached_org_str = get_cache().get(key)

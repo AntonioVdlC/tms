@@ -14,6 +14,7 @@ from api.models.organisation import *
 from api.utils.db import get_client
 from api.commons import user as user_commons
 from api.commons import organisation as organisation_commons
+from api.commons import common as common
 
 
 class OrganisationRequest(BaseModel):
@@ -77,7 +78,7 @@ def get_organisations_for_user(user_id: str) -> list:
         else:
             return []
     except (PyMongoError, RedisError) as e:
-        raise UnknownSystemException(user_id)
+        raise common.UnknownSystemException(user_id)
 
 
 def get_organisation_for_user(organisation_id: str, user_id: str) -> GetOrganisationResponse:
@@ -96,7 +97,7 @@ def get_organisation_for_user(organisation_id: str, user_id: str) -> GetOrganisa
                                                                     is_deleted=organisation.is_deleted)
         return response
     else:
-        raise OrganisationIllegalAccessException(organisation_id, user_id)
+        raise organisation_commons.OrganisationIllegalAccessException(organisation_id, user_id)
 
 
 def edit_organisation(request: OrganisationRequest, organisation_id: str, user_id: str) -> OrganisationResponse:
@@ -111,14 +112,14 @@ def edit_organisation(request: OrganisationRequest, organisation_id: str, user_i
         current_app.logger.info('Editing organisation..')
         update_result = update_organisation(organisation_id, request.organisation_name)
         if update_result.modified_count != 1:
-            raise UnknownSystemException(user_id)
+            raise common.UnknownSystemException(user_id)
         organisation_commons.clear_org_cache(organisation_id)
         organisation = organisation_commons.get_organisation_by_id(organisation_id)
         return OrganisationResponse(organisation_name=organisation.name,
                                     organisation_id=str(organisation.object_id),
                                     created_at=organisation.created_at)
     else:
-        raise OrganisationIllegalAccessException(organisation_id, user_id)
+        raise organisation_commons.OrganisationIllegalAccessException(organisation_id, user_id)
 
 
 def delete_organisation(organisation_id: str, user_id: str):
@@ -133,11 +134,11 @@ def delete_organisation(organisation_id: str, user_id: str):
         current_app.logger.info('Deleting organisation..')
         delete_result = soft_delete_organisation(organisation_id)
         if delete_result.modified_count != 1:
-            raise UnknownSystemException(user_id)
+            raise common.UnknownSystemException(user_id)
         organisation_commons.clear_org_cache(organisation_id)
         return {"message": "organisation deleted"}
     else:
-        raise OrganisationIllegalAccessException(organisation_id, user_id)
+        raise organisation_commons.OrganisationIllegalAccessException(organisation_id, user_id)
 
 
 def get_organisations_by_ids(org_ids: list):

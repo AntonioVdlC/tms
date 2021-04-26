@@ -1,4 +1,6 @@
 from flask import Flask, jsonify, g, current_app, request
+from redis.exceptions import RedisError, ConnectionError
+
 from api.utils.cache import init_cache, get_cache
 from api.utils.db import init_db, get_db
 from api.utils.log import init_log
@@ -27,6 +29,8 @@ def create_app(test_config=None):
             g.user_id = user_id
         except (AttributeError, IndexError) as e:
             return jsonify({"message": "Not logged in"}), 401
+        except (RedisError, ConnectionError) as e:
+            return jsonify({"message": "Unknown system error", "code": 50000}), 500
 
     app.register_blueprint(auth.blueprint)
     app.register_blueprint(organisation.blueprint)
