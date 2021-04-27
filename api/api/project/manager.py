@@ -150,6 +150,30 @@ def edit_project(org_id: str, user_id: str, proj_id: str, request: ProjectModel)
         raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
 
 
+def delete_project(org_id: str, user_id: str, proj_id: str):
+    try:
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        project = get_project_for_id(proj_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_admin(organisation, user_id):
+            current_app.logger.info('Deleting project..')
+            delete_result = project_db.soft_delete_project(proj_id)
+            if delete_result.modified_count != 1:
+                raise common.UnknownSystemException(user_id)
+            clear_project_cache(proj_id)
+            clear_projects_org_cache(org_id)
+            return {"message": "project deleted"}
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError) as ex:
+        raise common.UnknownSystemException(user_id)
+
+
 def get_projects_for_org(org_id: str) -> list:
     key = f'org_{org_id}_projects'
     cached_values = get_cache().get(key)

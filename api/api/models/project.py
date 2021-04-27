@@ -81,3 +81,11 @@ def update_project(proj_id: str, name: str, langs: list) -> UpdateResult:
                                                                   'updated_at': datetime.utcnow()}},
                                                         upsert=False)
     return result
+
+
+def soft_delete_project(proj_id: str) -> UpdateResult:
+    result: UpdateResult = get_db().projects.with_options(write_concern=WriteConcern(w="majority")) \
+                                    .update_one({"_id": ObjectId(proj_id)},
+                                                {'$set': {'is_deleted': True}},
+                                                upsert=False)
+    return result
