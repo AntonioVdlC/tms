@@ -60,6 +60,24 @@ def add_project(name: str, langs: list, creator_id: str, org_id: str) -> Project
 
 def get_projects_by_org_id(org_id: str) -> list:
     projects = []
-    for project_dict in get_db().projects.find({"org_id": org_id}):
+    for project_dict in get_db().projects.find({"org_id": org_id, "is_deleted": False}):
         projects.append(Project.from_dict(project_dict))
     return projects
+
+
+def get_project_by_id(object_id: str) -> Project:
+    proj_dict = get_db().projects.find_one({"_id": ObjectId(object_id), "is_deleted": False})
+    if proj_dict is None:
+        return None
+    else:
+        return Project.from_dict(proj_dict)
+
+
+def update_project(proj_id: str, name: str, langs: list) -> UpdateResult:
+    result: UpdateResult = get_db().projects.with_options(write_concern=WriteConcern(w="majority"))\
+                                            .update_one({"_id": ObjectId(proj_id)},
+                                                        {'$set': {'name': name,
+                                                                  'langs': langs,
+                                                                  'updated_at': datetime.utcnow()}},
+                                                        upsert=False)
+    return result

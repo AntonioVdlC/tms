@@ -45,3 +45,39 @@ def get_projects(org_id: str):
     except UnknownSystemException as ex:
         current_app.logger.error("Unknown system exception", ex)
         return jsonify({"error": "Unknown system exception", "code": 50007}), 500
+
+
+@blueprint.route('/<string:proj_id>', methods=["GET"])
+def get_project(org_id: str, proj_id: str):
+    try:
+        project = manager.get_project(org_id, g.user_id, proj_id)
+        return jsonify(project.dict())
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40409}), 404
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "No access to organisation", "code": 40106}), 401
+    except ProjectNotFoundExeption as ex:
+        current_app.logger.warn(f"Unknown project: {ex.proj_id}")
+        return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40410}), 404
+
+
+@blueprint.route('/<string:proj_id>', methods=['PUT'])
+def edit_project(org_id: str, proj_id: str):
+    try:
+        edit_project_request = manager.ProjectModel(**request.json)
+        project = manager.edit_project(org_id, g.user_id, proj_id, edit_project_request)
+        return jsonify(project.dict())
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40411}), 404
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "No access to organisation", "code": 40107}), 401
+    except ProjectNotFoundExeption as ex:
+        current_app.logger.warn(f"Unknown project: {ex.proj_id}")
+        return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40412}), 404
+    except UnknownSystemException as ex:
+        current_app.logger.error("Unknown system exception", ex)
+        return jsonify({"error": "Unknown system exception", "code": 50008}), 500

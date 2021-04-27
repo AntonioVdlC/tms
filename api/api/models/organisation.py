@@ -88,7 +88,7 @@ def insert_organisation(name: str, creator_id: str, object_id: ObjectId, session
 
 
 def get_organisation(object_id: str) -> Organisation:
-    org_dict = get_db().organisations.find_one({"_id": ObjectId(object_id)})
+    org_dict = get_db().organisations.find_one({"_id": ObjectId(object_id), "is_deleted": False})
     if org_dict is None:
         return None
     else:
@@ -98,7 +98,7 @@ def get_organisation(object_id: str) -> Organisation:
 def get_organisations(object_ids: list) -> list:
     ids = list(map(lambda object_id: ObjectId(object_id), object_ids))
     organisations = []
-    for org_dict in get_db().organisations.find({"_id": {"$in": ids}}):
+    for org_dict in get_db().organisations.find({"_id": {"$in": ids}, "is_deleted": False}):
         organisations.append(Organisation.from_dict(org_dict))
     return organisations
 
