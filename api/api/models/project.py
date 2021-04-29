@@ -7,9 +7,45 @@ from datetime import datetime
 from api.utils.db import get_db
 
 
+class Key(object):
+    def __init__(self, key, creator_id: str, name: str, description: str, is_deleted: bool,
+                 created_at: datetime, updated_at: datetime):
+        self.key = key
+        self.creator_id = creator_id
+        self.name = name
+        self.description = description
+        self.is_deleted = is_deleted
+        self.created_at = created_at
+        self.updated_at = updated_at
+
+    def as_dict(self, to_cache=False):
+        key_dict = {"name": self.name, "description": self.description, "key": self.key, "creator_id": self.creator_id,
+                    "is_deleted": self.is_deleted}
+        if to_cache:
+            key_dict['created_at'] = self.created_at.strftime('%Y-%m-%d %H:%M:%S.%f')
+            key_dict['updated_at'] = self.updated_at.strftime('%Y-%m-%d %H:%M:%S.%f')
+        else:
+            key_dict['created_at'] = self.created_at
+            key_dict['updated_at'] = self.updated_at
+        return key_dict
+
+    @staticmethod
+    def from_dict(key_dict, from_cache=False):
+        if from_cache:
+            created_at = datetime.strptime(key_dict['created_at'], '%Y-%m-%d %H:%M:%S.%f')
+            updated_at = datetime.strptime(key_dict['updated_at'], '%Y-%m-%d %H:%M:%S.%f')
+            return Key(key=key_dict['key'], creator_id=key_dict['creator_id'], name=key_dict['name'],
+                       description=key_dict['description'], is_deleted=key_dict['is_deleted'], created_at=created_at,
+                       updated_at=updated_at)
+        else:
+            return Key(key=key_dict['key'], creator_id=key_dict['creator_id'], name=key_dict['name'],
+                       description=key_dict['description'], is_deleted=key_dict['is_deleted'],
+                       created_at=key_dict['created_at'], updated_at=key_dict['updated_at'])
+
+
 class Project(object):
     def __init__(self, name: str, langs: list, creator_id: str, org_id: str, created_at: datetime, updated_at: datetime,
-                 is_deleted: bool, object_id: ObjectId, key: list = []):
+                 is_deleted: bool, object_id: ObjectId, keys: list = []):
         self.object_id = object_id
         self.name = name
         self.langs = langs
@@ -18,11 +54,12 @@ class Project(object):
         self.created_at = created_at
         self.updated_at = updated_at
         self.is_deleted = is_deleted
-        self.key = key
+        self.keys = keys
 
     def as_dict(self, to_cache=False):
+        keys_list = list(map(lambda key: key.as_dict(to_cache=to_cache), self.keys))
         project_dict = {"name": self.name, "langs": self.langs, "creator_id": self.creator_id, "org_id": self.org_id,
-                        "is_deleted": self.is_deleted, "key": self.key}
+                        "is_deleted": self.is_deleted, "keys": keys_list}
         if to_cache:
             project_dict['_id'] = str(self.object_id)
             project_dict['created_at'] = self.created_at.strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -35,18 +72,19 @@ class Project(object):
 
     @staticmethod
     def from_dict(project_dict, from_cache=False):
+        keys = list(map(lambda key_dict: Key.from_dict(key_dict, from_cache=from_cache), project_dict['keys']))
         if from_cache:
             object_id = ObjectId(project_dict['_id'])
             created_at = datetime.strptime(project_dict['created_at'], '%Y-%m-%d %H:%M:%S.%f')
             updated_at = datetime.strptime(project_dict['updated_at'], '%Y-%m-%d %H:%M:%S.%f')
             return Project(object_id=object_id, name=project_dict['name'], langs=project_dict['langs'],
                            creator_id=project_dict['creator_id'], org_id=project_dict['org_id'],
-                           is_deleted=project_dict['is_deleted'], key=project_dict['key'],
+                           is_deleted=project_dict['is_deleted'], keys=keys,
                            created_at=created_at, updated_at=updated_at)
         else:
             return Project(object_id=project_dict['_id'], name=project_dict['name'], langs=project_dict['langs'],
                            creator_id=project_dict['creator_id'], org_id=project_dict['org_id'],
-                           is_deleted=project_dict['is_deleted'], key=project_dict['key'],
+                           is_deleted=project_dict['is_deleted'], keys=keys,
                            created_at=project_dict['created_at'], updated_at=project_dict['updated_at'])
 
 
@@ -89,3 +127,10 @@ def soft_delete_project(proj_id: str) -> UpdateResult:
                                                 {'$set': {'is_deleted': True}},
                                                 upsert=False)
     return result
+
+
+def add_key(proj_id: str, name: str, description: str, generated_key: str, creator_id: str) -> Key:
+    created_at = updated_at = datetime.utcnow()
+    key = Key(generated_key, creator_id, name, description, False, created_at, updated_at)
+    get_db().projects.update_one({'_id': ObjectId(proj_id)}, {'$push': {'keys': key.as_dict()}})
+    return key

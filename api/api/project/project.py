@@ -68,7 +68,7 @@ def get_project(org_id: str, proj_id: str):
     except OrganisationIllegalAccessException as ex:
         current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
         return jsonify({"error": "No access to organisation", "code": 40106}), 401
-    except ProjectNotFoundExeption as ex:
+    except ProjectNotFoundException as ex:
         current_app.logger.warn(f"Unknown project: {ex.proj_id}")
         return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40410}), 404
 
@@ -88,7 +88,7 @@ def edit_project(org_id: str, proj_id: str):
     except OrganisationIllegalAccessException as ex:
         current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
         return jsonify({"error": "No access to organisation", "code": 40107}), 401
-    except ProjectNotFoundExeption as ex:
+    except ProjectNotFoundException as ex:
         current_app.logger.warn(f"Unknown project: {ex.proj_id}")
         return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40415}), 404
     except UnknownSystemException as ex:
@@ -107,7 +107,7 @@ def delete_project(org_id: str, proj_id: str):
     except DeletedOrganisationAccessException as ex:
         current_app.logger.warn(f"Access to deleted organisation: {org_id}")
         return jsonify({"error": "Accessing deleted organisations", "code": 40417}), 404
-    except ProjectNotFoundExeption as ex:
+    except ProjectNotFoundException as ex:
         current_app.logger.warn(f"Unknown project: {ex.proj_id}")
         return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40418}), 404
     except OrganisationIllegalAccessException as ex:
@@ -115,3 +115,29 @@ def delete_project(org_id: str, proj_id: str):
         return jsonify({"error": "No access to organisation", "code": 40108}), 401
     except UnknownSystemException as e:
         return jsonify({"error": "Unknown system exceptions", "code": 50009}), 500
+
+
+@blueprint.route('/<string:proj_id>/keys', methods=['POST'])
+def create_key(org_id: str, proj_id: str):
+    try:
+        create_key_response = manager.create_key(org_id, g.user_id, proj_id, manager.CreateKeyRequest(**request.json))
+        return create_key_response.dict()
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40419}), 404
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40420}), 404
+    except ProjectNotFoundException as ex:
+        current_app.logger.warn(f"Unknown project: {ex.proj_id}")
+        return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40421}), 404
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "No access to organisation", "code": 40109}), 401
+    except DuplicateKeyNameException as ex:
+        return jsonify({"error": f"Duplicate key name in project {ex.name}", "code": 40009}), 400
+    except DuplicateKeyException as ex:
+        current_app.logger.error(f"This should really not happen. big trouble. duplicate key: {ex.key}")
+        return jsonify({"error": "Duplicate key", "code": 50010}), 500
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exceptions", "code": 50011}), 500
