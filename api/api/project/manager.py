@@ -79,6 +79,7 @@ class CreateKeyRequest(BaseModel):
 
 
 class KeyModel(BaseModel):
+    key_id: str
     name: str
     description: str
     key: str
@@ -202,6 +203,7 @@ def delete_project(org_id: str, user_id: str, proj_id: str):
 
 def create_key(org_id: str, user_id: str, proj_id: str, request: CreateKeyRequest) -> KeyModel:
     try:
+        # TODO missing id for reference
         key_name = request.name.strip()
         key_description = request.description.strip()
         organisation = organisation_commons.get_organisation_by_id(org_id)
@@ -224,7 +226,8 @@ def create_key(org_id: str, user_id: str, proj_id: str, request: CreateKeyReques
             current_app.logger.info('Creating new key..')
             key = project_db.add_key(proj_id, key_name, key_description, generated_key, user_id)
             clear_project_cache(proj_id)
-            return KeyModel(name=key.name, description=key.description, key=key.key, created_at=key.created_at)
+            return KeyModel(key_id=key.key_id, name=key.name, description=key.description, key=key.key,
+                            created_at=key.created_at)
         else:
             raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
     except (PyMongoError, RedisError) as ex:

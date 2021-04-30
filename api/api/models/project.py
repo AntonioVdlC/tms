@@ -8,8 +8,9 @@ from api.utils.db import get_db
 
 
 class Key(object):
-    def __init__(self, key, creator_id: str, name: str, description: str, is_deleted: bool,
+    def __init__(self, key_id, key, creator_id: str, name: str, description: str, is_deleted: bool,
                  created_at: datetime, updated_at: datetime):
+        self.key_id = key_id
         self.key = key
         self.creator_id = creator_id
         self.name = name
@@ -20,7 +21,7 @@ class Key(object):
 
     def as_dict(self, to_cache=False):
         key_dict = {"name": self.name, "description": self.description, "key": self.key, "creator_id": self.creator_id,
-                    "is_deleted": self.is_deleted}
+                    "is_deleted": self.is_deleted, "id": self.key_id}
         if to_cache:
             key_dict['created_at'] = self.created_at.strftime('%Y-%m-%d %H:%M:%S.%f')
             key_dict['updated_at'] = self.updated_at.strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -34,12 +35,12 @@ class Key(object):
         if from_cache:
             created_at = datetime.strptime(key_dict['created_at'], '%Y-%m-%d %H:%M:%S.%f')
             updated_at = datetime.strptime(key_dict['updated_at'], '%Y-%m-%d %H:%M:%S.%f')
-            return Key(key=key_dict['key'], creator_id=key_dict['creator_id'], name=key_dict['name'],
-                       description=key_dict['description'], is_deleted=key_dict['is_deleted'], created_at=created_at,
-                       updated_at=updated_at)
+            return Key(key_id=key_dict['id'], key=key_dict['key'], creator_id=key_dict['creator_id'],
+                       name=key_dict['name'], description=key_dict['description'], is_deleted=key_dict['is_deleted'],
+                       created_at=created_at, updated_at=updated_at)
         else:
-            return Key(key=key_dict['key'], creator_id=key_dict['creator_id'], name=key_dict['name'],
-                       description=key_dict['description'], is_deleted=key_dict['is_deleted'],
+            return Key(key_id=key_dict['id'], key=key_dict['key'], creator_id=key_dict['creator_id'],
+                       name=key_dict['name'], description=key_dict['description'], is_deleted=key_dict['is_deleted'],
                        created_at=key_dict['created_at'], updated_at=key_dict['updated_at'])
 
 
@@ -131,6 +132,7 @@ def soft_delete_project(proj_id: str) -> UpdateResult:
 
 def add_key(proj_id: str, name: str, description: str, generated_key: str, creator_id: str) -> Key:
     created_at = updated_at = datetime.utcnow()
-    key = Key(generated_key, creator_id, name, description, False, created_at, updated_at)
+    key_id = str(ObjectId())
+    key = Key(key_id, generated_key, creator_id, name, description, False, created_at, updated_at)
     get_db().projects.update_one({'_id': ObjectId(proj_id)}, {'$push': {'keys': key.as_dict()}})
     return key
