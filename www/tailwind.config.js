@@ -5,8 +5,14 @@ module.exports = {
     extend: {},
   },
   variants: {
-    transitionProperty: ["motion-reduce"],
-    extend: {},
+    extend: {
+      outline: ["focus-visible"],
+      ringColor: ["focus-visible"],
+      ringOffsetColor: ["focus-visible"],
+      ringOffsetWidth: ["focus-visible"],
+      ringOpacity: ["focus-visible"],
+      ringWidth: ["focus-visible"],
+    },
   },
   plugins: [require("@tailwindcss/forms"), require("@tailwindcss/line-clamp")],
 };
