@@ -120,7 +120,7 @@ def delete_project(org_id: str, proj_id: str):
 @blueprint.route('/<string:proj_id>/keys', methods=['POST'])
 def create_key(org_id: str, proj_id: str):
     try:
-        create_key_response = manager.create_key(org_id, g.user_id, proj_id, manager.CreateKeyRequest(**request.json))
+        create_key_response = manager.create_key(org_id, g.user_id, proj_id, manager.KeyRequest(**request.json))
         return create_key_response.dict()
     except OrganisationNotFoundException as ex:
         current_app.logger.warn(f"Unknown organisation: {org_id}")
@@ -141,3 +141,52 @@ def create_key(org_id: str, proj_id: str):
         return jsonify({"error": "Duplicate key", "code": 50010}), 500
     except UnknownSystemException as e:
         return jsonify({"error": "Unknown system exceptions", "code": 50011}), 500
+
+
+@blueprint.route('/<string:proj_id>/keys', methods=['GET'])
+def get_keys(org_id: str, proj_id: str):
+    try:
+        get_keys_response = manager.get_keys(org_id, g.user_id, proj_id)
+        response = list(map(lambda key: key.dict(), get_keys_response))
+        return jsonify(response)
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40422}), 404
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40423}), 404
+    except ProjectNotFoundException as ex:
+        current_app.logger.warn(f"Unknown project: {ex.proj_id}")
+        return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40424}), 404
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "No access to organisation", "code": 40110}), 401
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exceptions", "code": 50012}), 500
+
+
+@blueprint.route('/<string:proj_id>/keys/<string:key_id>', methods=['GET'])
+def get_key(org_id: str, proj_id: str, key_id: str):
+    try:
+        response = manager.get_key(org_id, g.user_id, proj_id, key_id)
+        return jsonify(response.dict())
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40425}), 404
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40426}), 404
+    except ProjectNotFoundException as ex:
+        current_app.logger.warn(f"Unknown project: {ex.proj_id}")
+        return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40427}), 404
+    except DeletedKeyAccessException as ex:
+        current_app.logger.warn(f"Accessing deleted key: {ex.key_id}")
+        return jsonify({"error": f"Accessing deleted key by id {ex.key_id}", "code": 40428}), 404
+    except KeyNotFoundException as ex:
+        current_app.logger.warn(f'Unknown key: {ex.key_id}')
+        return jsonify({"error": f"Unknown key by id {ex.key_id}", "code": 40429}), 404
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "No access to organisation", "code": 40111}), 401
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exceptions", "code": 50013}), 500

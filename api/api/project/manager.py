@@ -61,7 +61,7 @@ class ProjectModel(BaseModel):
         return langs
 
 
-class CreateKeyRequest(BaseModel):
+class KeyRequest(BaseModel):
     name: str
     description: str
 
@@ -201,9 +201,8 @@ def delete_project(org_id: str, user_id: str, proj_id: str):
         raise common.UnknownSystemException(user_id)
 
 
-def create_key(org_id: str, user_id: str, proj_id: str, request: CreateKeyRequest) -> KeyModel:
+def create_key(org_id: str, user_id: str, proj_id: str, request: KeyRequest) -> KeyModel:
     try:
-        # TODO missing id for reference
         key_name = request.name.strip()
         key_description = request.description.strip()
         organisation = organisation_commons.get_organisation_by_id(org_id)
@@ -223,11 +222,62 @@ def create_key(org_id: str, user_id: str, proj_id: str, request: CreateKeyReques
 
         if (str(organisation.object_id) in user.organisations) and \
                 organisation_commons.check_if_admin(organisation, user_id):
-            current_app.logger.info('Creating new key..')
             key = project_db.add_key(proj_id, key_name, key_description, generated_key, user_id)
             clear_project_cache(proj_id)
             return KeyModel(key_id=key.key_id, name=key.name, description=key.description, key=key.key,
                             created_at=key.created_at)
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError) as ex:
+        raise common.UnknownSystemException(user_id)
+
+
+def get_keys(org_id: str, user_id: str, proj_id: str) -> list:
+    try:
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        project = get_project_for_id(proj_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_dev_and_above(organisation, user_id):
+            keys = list(filter(lambda key: not key.is_deleted, project.keys))
+            response = list(map(lambda key: KeyModel(key_id=key.key_id, name=key.name, description=key.description,
+                                                     key=key.key, created_at=key.created_at),
+                                keys))
+            return response
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError) as ex:
+        raise common.UnknownSystemException(user_id)
+
+
+def get_key(org_id: str, user_id: str, proj_id: str, key_id: str) -> KeyModel:
+    try:
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        project = get_project_for_id(proj_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_dev_and_above(organisation, user_id):
+            current_app.logger.info('getting key..')
+            key = None
+            for k in project.keys:
+                if k.key_id == key_id:
+                    key = k
+                    break
+            if key is None:
+                raise KeyNotFoundException(key_id)
+            else:
+                if key.is_deleted:
+                    raise DeletedKeyAccessException(key_id)
+                return KeyModel(key_id=key.key_id, name=key.name, description=key.description,
+                                key=key.key, created_at=key.created_at)
         else:
             raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
     except (PyMongoError, RedisError) as ex:

@@ -31,3 +31,14 @@ class DuplicateKeyException(Exception):
 class DuplicateKeyNameException(Exception):
     def __init__(self, name):
         self.name = name
+
+
+class KeyNotFoundException(Exception):
+    def __init__(self, key_id):
+        self.key_id = key_id
+
+
+class DeletedKeyAccessException(Exception):
+    def __init__(self, key_id):
+        self.key_id = key_id
+

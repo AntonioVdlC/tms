@@ -47,6 +47,16 @@ def check_if_admin(organisation, user_id) -> bool:
     return flag
 
 
+def check_if_dev_and_above(organisation, user_id) -> bool:
+    flag = False
+    for member in organisation.members:
+        if (member.user_id == user_id) and (member.member_type == MemberType.admin or
+                                            member.member_type == MemberType.developer):
+            flag = True
+            break
+    return flag
+
+
 def clear_org_cache(org_id: str):
     key = f'org_{org_id}'
     get_cache().delete(key)
