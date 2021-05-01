@@ -136,3 +136,26 @@ def add_key(proj_id: str, name: str, description: str, generated_key: str, creat
     key = Key(key_id, generated_key, creator_id, name, description, False, created_at, updated_at)
     get_db().projects.update_one({'_id': ObjectId(proj_id)}, {'$push': {'keys': key.as_dict()}})
     return key
+
+
+def edit_key(proj_id: str, key_id: str, name: str, description: str) -> UpdateResult:
+    updated_at = datetime.utcnow()
+    result: UpdateResult = get_db().projects.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({"_id": ObjectId(proj_id), "keys.id": key_id},
+                    {"$set": {"keys.$.name": name,
+                              "keys.$.description": description,
+                              "keys.$.updated_at": updated_at,
+                              "updated_at": updated_at}},
+                    upsert=False)
+    return result
+
+
+def soft_delete_key(proj_id: str, key_id: str) -> UpdateResult:
+    updated_at = datetime.utcnow()
+    result: UpdateResult = get_db().projects.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({"_id": ObjectId(proj_id), "keys.id": key_id},
+                    {"$set": {"keys.$.is_deleted": True,
+                              "keys.$.updated_at": updated_at,
+                              "updated_at": updated_at}},
+                    upsert=False)
+    return result

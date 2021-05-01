@@ -284,6 +284,85 @@ def get_key(org_id: str, user_id: str, proj_id: str, key_id: str) -> KeyModel:
         raise common.UnknownSystemException(user_id)
 
 
+def edit_key(org_id: str, user_id: str, proj_id: str, key_id: str, request: KeyRequest) -> KeyModel:
+    try:
+        key_name = request.name.strip()
+        key_description = request.description.strip()
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        project = get_project_for_id(proj_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_admin(organisation, user_id):
+            existing_key = None
+            for key in project.keys:
+                if key.key_id == key_id:
+                    existing_key = key
+                if key.name == key_name and key.key_id != key_id:
+                    raise DuplicateKeyNameException(key_name)
+            current_app.logger.info(f'existing key id: {existing_key.key_id} is deleted: {existing_key.is_deleted}')
+            if existing_key is None:
+                raise KeyNotFoundException(key_id)
+            if existing_key.is_deleted:
+                raise DeletedKeyAccessException(key_id)
+            update_result = project_db.edit_key(proj_id, key_id, key_name, key_description)
+            if update_result.modified_count != 1:
+                raise common.UnknownSystemException(user_id)
+            clear_project_cache(proj_id)
+            clear_projects_org_cache(org_id)
+            updated_project = get_project_for_id(proj_id)
+            new_key = None
+            for key in updated_project.keys:
+                if key.key_id == key_id:
+                    new_key = key
+                    break
+            return KeyModel(key_id=new_key.key_id, name=new_key.name, description=new_key.description,
+                            key=new_key.key, created_at=new_key.created_at)
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError) as ex:
+        current_app.logger.info("Error", ex)
+        raise common.UnknownSystemException(user_id)
+
+
+def delete_key(org_id: str, user_id: str, proj_id: str, key_id: str):
+    try:
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        project = get_project_for_id(proj_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_admin(organisation, user_id):
+            current_app.logger.info('Deleting key..')
+            existing_key = None
+            for key in project.keys:
+                if key.key_id == key_id:
+                    existing_key = key
+                    break
+            if existing_key is None:
+                raise KeyNotFoundException(key_id=key_id)
+            if existing_key.is_deleted:
+                raise DeletedKeyAccessException(key_id)
+
+            delete_result = project_db.soft_delete_key(proj_id, key_id)
+            if delete_result.modified_count != 1:
+                raise common.UnknownSystemException(user_id)
+            clear_project_cache(proj_id)
+            clear_projects_org_cache(org_id)
+            return {"message": "key deleted"}
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError) as ex:
+        current_app.logger.info("Error", ex)
+        raise common.UnknownSystemException(user_id)
+
+
 def get_projects_for_org(org_id: str) -> list:
     key = f'org_{org_id}_projects'
     cached_values = get_cache().get(key)
