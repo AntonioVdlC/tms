@@ -13,13 +13,15 @@
       </div>
 
       <div class="bg-yellow-500 py-8">
-        <div class="text-left w-1/2 m-auto mb-4">
-          <h2 class="text-2xl font-semibold text-white">Signup</h2>
+        <div class="text-left w-3/4 m-auto">
+          <h2 class="text-2xl font-semibold text-white mb-4">Signup</h2>
+          <SignupForm @error="onError" />
+          <p class="text-white mt-4 text-md">
+            Already have an account?
+            <a href="/auth/login" class="cursor-pointer underline">Login</a>
+            instead!
+          </p>
         </div>
-        <LoginSignUpForm
-          class="bg-white bg-opacity-75 backdrop-blur-md border-transparent border-2 rounded-lg w-1/2 m-auto p-4 grid grid-cols-1 gap-1 shadow-md"
-          is-signup-form
-        />
       </div>
     </div>
     <!--/Hero + Signup -->
@@ -27,12 +29,26 @@
 </template>
 
 <script>
-import LoginSignUpForm from "@/containers/LoginSignUpForm.vue";
+import { useRouter } from "vue-router";
+
+import SignupForm from "@/containers/SignupForm.vue";
 
 export default {
   components: {
-    LoginSignUpForm,
+    SignupForm,
   },
-  setup() {},
+  setup() {
+    const router = useRouter();
+
+    function onError(code) {
+      if (code === 40002) {
+        router.replace("/auth/login");
+      }
+    }
+
+    return {
+      onError,
+    };
+  },
 };
 </script>
