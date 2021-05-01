@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import types from "@/store/types";
+import { AUTH_ACTION_SIGNUP, AUTH_ACTION_LOGIN } from "@/store/types";
 
 export default {
   data() {
@@ -34,9 +34,7 @@ export default {
 
       this.$store
         .dispatch({
-          type: this.isSignUp
-            ? types.AUTH_ACTION_SIGNUP
-            : types.AUTH_ACTION_LOGIN,
+          type: this.isSignUp ? AUTH_ACTION_SIGNUP : AUTH_ACTION_LOGIN,
           payload: {
             email: this.email,
             first_name: this.firstName,
@@ -70,7 +68,7 @@ export default {
     login() {
       return this.$store
         .dispatch({
-          type: types.AUTH_ACTION_LOGIN,
+          type: AUTH_ACTION_LOGIN,
           payload: {
             email: this.email,
           },

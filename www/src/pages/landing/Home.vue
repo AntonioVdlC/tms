@@ -58,7 +58,7 @@
 import { ref } from "vue";
 import { useStore } from "vuex";
 
-import types from "@/store/types";
+import { AUTH_ACTION_SIGNUP } from "@/store/types";
 
 import Button from "@/components/Button.vue";
 import Input from "@/components/Input.vue";
@@ -96,7 +96,7 @@ export default {
 
       store
         .dispatch({
-          type: types.AUTH_ACTION_SIGNUP,
+          type: AUTH_ACTION_SIGNUP,
           payload: {
             email: email,
             first_name: firstName,

@@ -1,22 +1,9 @@
-// import api from "@/api"
-
-const state = {
-  list: [],
-  details: {},
-};
-
-const getters = {
-  details(state) {
-    return (id) => state.details[id] || { name: "Some Segment" };
-  },
-};
-
-const actions = {};
-
-const mutations = {};
+import state from "@/store/modules/project/state";
+import getters from "@/store/modules/project/getters";
+import actions from "@/store/modules/project/actions";
+import mutations from "@/store/modules/project/mutations";
 
 export default {
-  namespaced: true,
   state,
   getters,
   actions,

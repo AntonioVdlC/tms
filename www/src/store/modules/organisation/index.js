@@ -1,35 +1,9 @@
-import api from "@/api";
-
-const state = {
-  list: [],
-};
-
-const getters = {
-  list(state) {
-    return state.list || [];
-  },
-};
-
-const actions = {
-  getList({ commit }) {
-    return api.get(`/organisations`).then((res) => {
-      commit("updateList", res.data);
-    });
-  },
-  update() {
-    // TODO
-    return Promise.resolve(true);
-  },
-};
-
-const mutations = {
-  updateList(state, list) {
-    state.list = list;
-  },
-};
+import state from "@/store/modules/organisation/state";
+import getters from "@/store/modules/organisation/getters";
+import actions from "@/store/modules/organisation/actions";
+import mutations from "@/store/modules/organisation/mutations";
 
 export default {
-  namespaced: true,
   state,
   getters,
   actions,
