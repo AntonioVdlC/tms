@@ -1,8 +1,6 @@
 <template>
   <div>
-    <nav
-      class="px-4 py-2 sticky top-0 bg-white bg-opacity-75 backdrop-blur-sm border-gray-300 border-b"
-    >
+    <nav class="px-4 py-2 sticky top-0 bg-white border-gray-300 border-b">
       <div class="flex max-w-5xl mx-auto">
         <a href="/">TMS</a>
 
