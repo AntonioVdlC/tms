@@ -10,6 +10,16 @@ const routes = [
         component: () => import("@/pages/auth/Login.vue"),
       },
       {
+        path: "/auth/login/sent",
+        name: "LoginEmailSent",
+        component: () => import("@/pages/auth/LoginEmailSent.vue"),
+      },
+      {
+        path: "/auth/signup/sent",
+        name: "SignupEmailSent",
+        component: () => import("@/pages/auth/SignupEmailSent.vue"),
+      },
+      {
         path: "/auth/callback",
         name: "AuthCallback",
         component: () => import("@/pages/auth/Callback.vue"),

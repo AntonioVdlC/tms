@@ -1,3 +1,7 @@
+<template>
+  <div>Logout success</div>
+</template>
+
 <script>
 export default {
   created() {

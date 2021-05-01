@@ -56,6 +56,9 @@
 
 <script>
 import { ref } from "vue";
+import { useStore } from "vuex";
+
+import types from "@/store/types";
 
 import Button from "@/components/Button.vue";
 import Input from "@/components/Input.vue";
@@ -74,6 +77,8 @@ export default {
     const inputFirstName = ref(null);
     const inputLastName = ref(null);
 
+    const store = useStore();
+
     const submit = async () => {
       if (!email.value) {
         inputEmail.value.onBlur();
@@ -89,13 +94,13 @@ export default {
         return;
       }
 
-      this.$store
+      store
         .dispatch({
-          type: "auth/signup",
+          type: types.AUTH_ACTION_SIGNUP,
           payload: {
-            email: this.email,
-            first_name: this.firstName,
-            last_name: this.lastName,
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
           },
         })
         .then(() => {

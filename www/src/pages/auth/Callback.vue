@@ -1,3 +1,7 @@
+<template>
+  <div>Logging you in ...</div>
+</template>
+
 <script>
 export default {
   created() {
