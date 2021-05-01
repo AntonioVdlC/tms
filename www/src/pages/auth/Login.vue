@@ -1,85 +1,47 @@
 <template>
-  <div>
-    Login
-
-    <input v-model="email" type="email" />
-
-    <template v-if="isSignUp">
-      <input v-model="firstName" type="text" />
-      <input v-model="lastName" type="text" />
-    </template>
-
-    <button @click="submit">Submit</button>
+  <div class="bg-yellow-500 w-screen h-screen">
+    <div class="md:w-3/4 h-screen m-auto py-32">
+      <div class="text-left w-3/4 md:w-1/2 m-auto mb-4">
+        <h2 class="text-2xl font-semibold text-white">{{ title }}</h2>
+        <p v-show="Boolean(explanation)" class="text-white">
+          {{ explanation }}
+        </p>
+      </div>
+      <LoginSignUpForm
+        class="bg-white bg-opacity-75 backdrop-blur-md border-transparent border-2 rounded-lg w-3/4 md:w-1/2 m-auto p-4 grid grid-cols-1 gap-1 shadow-md"
+        @error="onError"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import { AUTH_ACTION_SIGNUP, AUTH_ACTION_LOGIN } from "@/store/types";
+import { ref } from "vue";
+
+import LoginSignUpForm from "@/containers/LoginSignUpForm.vue";
 
 export default {
-  data() {
-    return {
-      isSignUp: false, // Flag to show signup form if account doesn't exist
-      email: "",
-      firstName: "",
-      lastName: "",
-    };
+  components: {
+    LoginSignUpForm,
   },
-  methods: {
-    submit() {
-      // TODO: proper input validation
-      if (!this.email) {
-        return;
+  setup() {
+    const title = ref("Login");
+    const explanation = ref("");
+
+    function onError(code) {
+      if (code === 40003) {
+        title.value = "Singup";
+        explanation.value =
+          "We can't find that email. Maybe you were trying to sing-up instead?";
       }
+    }
 
-      this.$store
-        .dispatch({
-          type: this.isSignUp ? AUTH_ACTION_SIGNUP : AUTH_ACTION_LOGIN,
-          payload: {
-            email: this.email,
-            first_name: this.firstName,
-            last_name: this.lastName,
-          },
-        })
-        .then(() => {
-          // TODO: Success
-        })
-        .catch((err) => {
-          const code = err?.response?.data?.code ?? 0;
+    return {
+      title,
+      explanation,
 
-          switch (code) {
-            // User tried to signup with an existing email
-            case 40002:
-              // Hide signup inputs
-              this.isSignUp = false;
-              // Try to login instead
-              this.login();
-              break;
-            // User tried to login with a non-existing email
-            case 40003:
-              // Display signup inputs
-              this.isSignUp = true;
-              break;
-            default:
-            // TODO: error handling
-          }
-        });
-    },
-    login() {
-      return this.$store
-        .dispatch({
-          type: AUTH_ACTION_LOGIN,
-          payload: {
-            email: this.email,
-          },
-        })
-        .then(() => {
-          // TODO: Success
-        })
-        .catch(() => {
-          // TODO: error handling
-        });
-    },
+      onError,
+    };
   },
 };
 </script>
