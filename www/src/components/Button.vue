@@ -7,7 +7,7 @@
         type === 'primary',
       'focus-visible:ring-blue-500': type === 'secondary',
     }"
-    :disabled="disabled"
+    :disabled="disabled || isLoading"
   >
     <slot />
   </button>
@@ -24,6 +24,10 @@ export default {
       },
     },
     disabled: {
+      type: Boolean,
+      default: false,
+    },
+    isLoading: {
       type: Boolean,
       default: false,
     },
