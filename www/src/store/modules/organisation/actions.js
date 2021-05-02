@@ -8,7 +8,7 @@ import {
 const actions = {
   [ORGANISATION_ACTION_GET_LIST]({ commit }) {
     return api.get(`/organisations`).then((res) => {
-      commit("updateList", res.data);
+      commit("update", { key: "list", value: res.data });
     });
   },
   [ORGANISATION_ACTION_UPDATE]() {

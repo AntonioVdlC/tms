@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import { useRouter } from "vue-router";
+
 export default {
   props: {
     crumbs: {
@@ -23,20 +25,28 @@ export default {
       required: true,
     },
   },
-  methods: {
-    isCurrentPage(page) {
+  setup(props) {
+    const router = useRouter();
+
+    function isCurrentPage(page) {
       return (
-        this.crumbs.findIndex((p) => p.path === page.path) ===
-        this.crumbs.length - 1
+        props.crumbs.findIndex((p) => p.path === page.path) ===
+        props.crumbs.length - 1
       );
-    },
-    goToPage(page) {
-      if (this.isCurrentPage(page)) {
+    }
+
+    function goToPage(page) {
+      if (isCurrentPage(page)) {
         return;
       }
 
-      this.$router.push(page.path);
-    },
+      router.push(page.path);
+    }
+
+    return {
+      isCurrentPage,
+      goToPage,
+    };
   },
 };
 </script>

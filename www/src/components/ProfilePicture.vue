@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { computed } from "vue";
+
 import DEFAULT_PROFILE_PICTURE from "@/assets/default_profile_picture.png";
 
 export default {
@@ -28,19 +30,25 @@ export default {
       default: "m",
     },
   },
-  computed: {
-    src() {
-      if (this.user.picture) {
-        return this.user.picture;
+  setup(props) {
+    const src = computed(() => {
+      if (props.user.picture) {
+        return props.user.picture;
       }
       return DEFAULT_PROFILE_PICTURE;
-    },
-    alt() {
-      if (this.user.name) {
-        return this.user.name;
+    });
+
+    const alt = computed(() => {
+      if (props.user.name) {
+        return props.user.name;
       }
       return "Your Profile";
-    },
+    });
+
+    return {
+      src,
+      alt,
+    };
   },
 };
 </script>

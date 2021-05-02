@@ -1,4 +1,5 @@
 export const AUTH_GETTER_EMAIL = "auth/email";
+export const AUTH_GETTER_FIRST_NAME = "auth/firstName";
 
 export const AUTH_ACTION_SIGNUP = "auth/signup";
 export const AUTH_ACTION_LOGIN = "auth/login";
