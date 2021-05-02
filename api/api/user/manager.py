@@ -15,6 +15,7 @@ from api.models import user as user_db
 
 
 class UserModel(BaseModel):
+    id: str
     first_name: str
     last_name: str
     email: str
@@ -46,7 +47,7 @@ class UpdateEmailRequest(BaseModel):
 def get_user(user_id: str) -> UserModel:
     try:
         user = user_commons.get_user(user_id)
-        return UserModel(first_name=user.first_name, last_name=user.last_name, email=user.email,
+        return UserModel(id=str(user.object_id),first_name=user.first_name, last_name=user.last_name, email=user.email,
                          created_at=user.created_at, updated_at=user.updated_at)
     except (PyMongoError, RedisError, ConnectionError) as e:
         raise common.UnknownSystemException(user_id)
