@@ -1,5 +1,5 @@
 from bson.objectid import ObjectId
-from pymongo.results import InsertOneResult
+from pymongo.results import InsertOneResult, UpdateResult
 from pymongo.write_concern import WriteConcern
 
 from datetime import datetime
@@ -74,3 +74,13 @@ def insert_user(email: str, first_name: str, last_name: str) -> User:
 def add_organisation_to_user(user_id: str, org_id: str, session):
     get_db().users.with_options(write_concern=WriteConcern(w="majority"))\
         .update_one({'_id': ObjectId(user_id)}, {'$push': {'organisations': org_id}}, session=session)
+
+
+def update_user_details(user_id: str, first_name: str, last_name: str) -> UpdateResult:
+    result: UpdateResult = get_db().users.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({'_id': ObjectId(user_id)},
+                    {'$set': {'first_name': first_name,
+                              'last_name': last_name,
+                              'updated_at': datetime.utcnow()}},
+                    upsert=False)
+    return result

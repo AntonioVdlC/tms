@@ -1,6 +1,5 @@
 from flask import current_app
 from pydantic import BaseModel, EmailStr, validator
-import mmh3
 from pymongo.errors import DuplicateKeyError
 from redis.exceptions import ConnectionError, TimeoutError
 
@@ -11,6 +10,7 @@ from enum import Enum
 from api.utils.cache import get_cache, get_token_generation_script
 from api.models.user import get_user_by_email, insert_user
 from api.auth.exceptions import *
+from api.commons.user import InvalidNameException, UserNotFoundException, generate_email_hash
 
 
 class SignupRequest(BaseModel):
@@ -115,11 +115,6 @@ def logout(token: str):
         get_cache().delete(token)
     except (ConnectionError, TimeoutError) as e:
         raise LogoutException(token)
-
-
-def generate_email_hash(email: str) -> str:
-    str_to_hash = "{email}|{uuid}".format(email=email, uuid=str(uuid.uuid4()))
-    return mmh3.hash(str_to_hash, signed=False)
 
 
 def set_token(email: str, token: str, user_info: str):

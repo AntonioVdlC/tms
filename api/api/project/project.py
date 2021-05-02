@@ -79,6 +79,9 @@ def edit_project(org_id: str, proj_id: str):
         edit_project_request = manager.ProjectModel(**request.json)
         project = manager.edit_project(org_id, g.user_id, proj_id, edit_project_request)
         return jsonify(project.dict())
+    except ValidationError as e:
+        current_app.logger.error('Issue with json body')
+        return jsonify({"error": "Issue creating project", "code": 40008}), 400
     except OrganisationNotFoundException as ex:
         current_app.logger.warn(f"Unknown organisation: {org_id}")
         return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40413}), 404

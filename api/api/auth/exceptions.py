@@ -1,8 +1,3 @@
-class InvalidNameException(ValueError):
-    def __init__(self, value):
-        self.value = value
-
-
 class DuplicateSignupException(Exception):
     def __init__(self, email):
         self.email = email
