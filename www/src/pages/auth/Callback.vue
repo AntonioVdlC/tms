@@ -11,7 +11,6 @@ export default {
     this.$store
       .dispatch({ type: "auth/callback", payload: { token, operation } })
       .then(() => {
-        // TODO: success
         this.$router.push("/app");
       })
       .catch(() => {

@@ -13,40 +13,14 @@
       </div>
 
       <div class="bg-yellow-500 py-8">
-        <div class="text-left w-1/2 m-auto mb-4">
-          <h2 class="text-2xl font-semibold text-white">Signup</h2>
-        </div>
-        <div
-          class="bg-white bg-opacity-75 backdrop-blur-md border-transparent border-2 rounded-lg w-1/2 m-auto p-4 grid grid-cols-1 gap-1 shadow-md"
-        >
-          <Input
-            ref="inputEmail"
-            v-model:value="email"
-            label="Email"
-            type="email"
-            placeholder="jane.doe@email.com"
-            required
-          />
-
-          <Input
-            ref="inputFirstName"
-            v-model:value="firstName"
-            label="First Name"
-            type="text"
-            placeholder="Jane"
-            required
-          />
-
-          <Input
-            ref="inputLastName"
-            v-model:value="lastName"
-            label="Last Name"
-            type="text"
-            placeholder="Doe"
-            required
-          />
-
-          <Button class="mt-2" type="primary" @click="submit">Submit</Button>
+        <div class="text-left w-3/4 m-auto">
+          <h2 class="text-2xl font-semibold text-white mb-4">Signup</h2>
+          <SignupForm @error="onError" />
+          <p class="text-white mt-4 text-md">
+            Already have an account?
+            <a href="/auth/login" class="cursor-pointer underline">Login</a>
+            instead!
+          </p>
         </div>
       </div>
     </div>
@@ -55,69 +29,25 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
-import types from "@/store/types";
-
-import Button from "@/components/Button.vue";
-import Input from "@/components/Input.vue";
+import SignupForm from "@/containers/SignupForm.vue";
 
 export default {
   components: {
-    Button,
-    Input,
+    SignupForm,
   },
   setup() {
-    const email = ref("");
-    const firstName = ref("");
-    const lastName = ref("");
+    const router = useRouter();
 
-    const inputEmail = ref(null);
-    const inputFirstName = ref(null);
-    const inputLastName = ref(null);
-
-    const store = useStore();
-
-    const submit = async () => {
-      if (!email.value) {
-        inputEmail.value.onBlur();
+    function onError(code) {
+      if (code === 40002) {
+        router.replace("/auth/login");
       }
-      if (!firstName.value) {
-        inputFirstName.value.onBlur();
-      }
-      if (!lastName.value) {
-        inputLastName.value.onBlur();
-      }
-
-      if (!(email.value && firstName.value && lastName.value)) {
-        return;
-      }
-
-      store
-        .dispatch({
-          type: types.AUTH_ACTION_SIGNUP,
-          payload: {
-            email: email,
-            first_name: firstName,
-            last_name: lastName,
-          },
-        })
-        .then(() => {
-          // TODO: Success
-        });
-    };
+    }
 
     return {
-      email,
-      firstName,
-      lastName,
-
-      inputEmail,
-      inputFirstName,
-      inputLastName,
-
-      submit,
+      onError,
     };
   },
 };
