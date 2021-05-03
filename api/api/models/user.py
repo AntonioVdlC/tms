@@ -84,3 +84,12 @@ def update_user_details(user_id: str, first_name: str, last_name: str) -> Update
                               'updated_at': datetime.utcnow()}},
                     upsert=False)
     return result
+
+
+def update_user_email(user_id: str, email: str) -> UpdateResult:
+    result: UpdateResult = get_db().users.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({'_id': ObjectId(user_id)},
+                    {'$set': {'email': email,
+                              'updated_at': datetime.utcnow()}},
+                    upsert=False)
+    return result
