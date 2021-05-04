@@ -50,7 +50,7 @@ def get_projects(org_id: str):
         current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
         return jsonify({"error": "No access to organisation", "code": 40105}), 401
     except UnknownSystemException as ex:
-        current_app.logger.error("Unknown system exception", ex)
+        current_app.logger.error("Unknown system exception")
         return jsonify({"error": "Unknown system exception", "code": 50007}), 500
 
 
@@ -95,7 +95,7 @@ def edit_project(org_id: str, proj_id: str):
         current_app.logger.warn(f"Unknown project: {ex.proj_id}")
         return jsonify({"error": f"Unknown project by id {ex.proj_id}", "code": 40415}), 404
     except UnknownSystemException as ex:
-        current_app.logger.error("Unknown system exception", ex)
+        current_app.logger.error("Unknown system exception")
         return jsonify({"error": "Unknown system exception", "code": 50008}), 500
 
 

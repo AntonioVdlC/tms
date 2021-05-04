@@ -10,7 +10,7 @@ from enum import Enum
 from api.utils.cache import get_cache, get_token_generation_script
 from api.models.user import get_user_by_email, insert_user
 from api.auth.exceptions import *
-from api.commons.user import InvalidNameException, UserNotFoundException, generate_email_hash
+from api.commons.user import InvalidNameException, UserNotFoundException, generate_unique_hash
 
 
 class SignupRequest(BaseModel):
@@ -56,7 +56,7 @@ def signup(request: SignupRequest):
     email = str(request.email)
     existing_user = get_user_by_email(email)
     if existing_user is None:
-        token: str = generate_email_hash(email)
+        token: str = generate_unique_hash(email)
         set_token(email, token, json.dumps(request.dict()))
         signup_url = generate_callback_url(token, Operation.signup.value)
         send_signup_email(signup_url)
@@ -73,7 +73,7 @@ def login(request: LoginRequest):
     if user is None:
         raise UnknownEmailException(email)
     else:
-        token: str = generate_email_hash(email)
+        token: str = generate_unique_hash(email)
         user_dict = user.as_dict(to_cache=True)
         set_token(email, token, json.dumps(user_dict))
         login_url = generate_callback_url(token, Operation.login.value)

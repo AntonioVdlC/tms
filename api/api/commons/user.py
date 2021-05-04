@@ -38,6 +38,9 @@ def get_user(user_id: str) -> User:
     return user
 
 
-def generate_email_hash(email: str) -> str:
-    str_to_hash = "{email}|{uuid}".format(email=email, uuid=str(uuid.uuid4()))
-    return mmh3.hash(str_to_hash, signed=False)
+def generate_unique_hash(user_info: str, hash128: bool = False) -> str:
+    str_to_hash = "{user_info}|{uuid}".format(user_info=user_info, uuid=str(uuid.uuid4()))
+    if hash128:
+        return mmh3.hash128(str_to_hash, signed=False)
+    else:
+        return mmh3.hash(str_to_hash, signed=False)

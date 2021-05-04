@@ -80,3 +80,23 @@ def update_email_callback():
         return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40442}), 404
     except UnknownSystemException as e:
         return jsonify({"error": "Unknown system exception", "code": 50017}), 500
+
+
+@blueprint.route('', methods=['DELETE'])
+def delete_user():
+    try:
+        token = request.cookies.get('access_token').split()[1]
+        manager.delete_user(g.user_id, token)
+        response = jsonify({"message": "User deleted"})
+        response.delete_cookie('access_token')
+        return response
+    except AttributeError as e:
+        return jsonify({"message": "Missing Authorization header", "code": 40015}), 400
+    except IndexError as e:
+        return jsonify({"message": "Illegal token format", "code": 40016}), 400
+    except UserNotFoundException as ex:
+        current_app.logger.error(f'User not found for id: {ex.user_id}')
+        return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40443}), 404
+    except UnknownSystemException as e:
+        current_app.logger.exception('Unhandled exception', extra={'stack': True})
+        return jsonify({"error": "Unknown system exception", "code": 50018}), 500

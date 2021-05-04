@@ -91,8 +91,8 @@ def update_user_email(user_id: str, request: UpdateEmailRequest):
         if prev_update_email_info is None:
             user_for_new_email = user_db.get_user_by_email(new_email)
             if user_for_new_email is None:
-                old_email_token: str = user_commons.generate_email_hash(user.email)
-                new_email_token: str = user_commons.generate_email_hash(new_email)
+                old_email_token: str = user_commons.generate_unique_hash(user.email)
+                new_email_token: str = user_commons.generate_unique_hash(new_email)
                 update_user_dict = {"id": user_id, "old_email": user.email, "old_email_token": old_email_token,
                                     "new_email": new_email, "new_email_token": new_email_token}
                 set_update_email_cache(user_id, update_user_dict)
@@ -116,7 +116,6 @@ def update_user_email(user_id: str, request: UpdateEmailRequest):
 
 def update_user_email_callback(user_id: str, request: UpdateEmailCallback):
     try:
-        current_app.logger.info('updating user email')
         user = user_commons.get_user(user_id)
         update_email_info = get_update_email_cache(user_id)
         if update_email_info is None:
@@ -159,7 +158,23 @@ def update_user_email_callback(user_id: str, request: UpdateEmailCallback):
             else:
                 return {"message": f"Received confirmation. Please double confirm from {other_email}"}
     except (PyMongoError, RedisError, ConnectionError) as e:
-        current_app.logger.error('everything is wrong bro', e)
+        current_app.logger.exception('everything is wrong bro', extra={'stack': True})
+        raise common.UnknownSystemException(user_id)
+
+
+def delete_user(user_id: str, token: str):
+    try:
+        user = user_commons.get_user(user_id)
+        # TODO: figure out how to delete user in all organisations and what to do when user is admin/owner for one
+        hashed_email = str(user_commons.generate_unique_hash(user.email, hash128=True))
+        hashed_last_name = str(user_commons.generate_unique_hash(user.last_name, hash128=True))
+        update_result = user_db.soft_delete_user(user_id, hashed_email, hashed_last_name)
+        if update_result.modified_count != 1:
+            raise common.UnknownSystemException(user_id)
+        delete_auth_token(token)
+        user_commons.clear_user_cache(user_id)
+    except (PyMongoError, RedisError, ConnectionError) as e:
+        current_app.logger.exception('everything is wrong bro', extra={'stack': True})
         raise common.UnknownSystemException(user_id)
 
 
@@ -202,5 +217,9 @@ def clear_update_email_cache(user_id: str, old_token: str, new_token: str):
     update_email_key = f'update_email_{user_id}'
     delete_keys = [update_email_key, old_token, new_token]
     get_cache().delete(*delete_keys)
+
+
+def delete_auth_token(token: str):
+    get_cache().delete(token)
 
 
