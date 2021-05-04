@@ -1,73 +1,37 @@
 <template>
-  <div>
-    <!-- Hero + Signup -->
-    <div class="grid grid-cols-1 md:grid-cols-2 md:gap-8 mb-8">
-      <div class="pt-8 mb-8 md:text-left md:mb-0">
-        <h1 class="text-4xl font-bold">Translate your products easily!</h1>
-        <p class="mt-4 text-2xl">
-          TMS allows you and your team to easily translate products and manage
-          internationalization.
-        </p>
+  <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+    <div class="sm:text-center lg:text-left lg:col-span-2">
+      <h1
+        class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl"
+      >
+        <span class="block xl:inline">Make your product</span>
+        {{ " " }}
+        <span class="block text-yellow-600 xl:inline">truly international</span>
+      </h1>
+      <p
+        class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0"
+      >
+        Translate your product in the most efficient way possible, leveraging
+        straightforward automations and simple workflows to decuple the reach of
+        your offerings.
+      </p>
 
-        <img class="mt-8" src="@/assets/landing_home_main.svg" />
-      </div>
+      <img class="mt-8 w-full md:hidden" src="@/assets/landing_home_main.svg" />
 
-      <div class="bg-yellow-500 py-8">
-        <div class="text-left w-3/4 m-auto">
-          <h2 class="text-2xl font-semibold text-white mb-4">Signup</h2>
-          <SignupForm @error="onError" />
-          <Error v-show="error" class="mt-4">
-            Oops, something is wrong with the data you entered. Can you
-            double-check please? :)
-          </Error>
-          <p class="text-white mt-4 text-md">
-            Already have an account?
-            <Link href="/auth/login">Login</Link>
-            instead!
-          </p>
+      <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+        <div class="rounded-md shadow">
+          <a
+            href="/auth/signup"
+            class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 md:py-4 md:text-lg md:px-10"
+          >
+            Get started
+          </a>
         </div>
       </div>
     </div>
-    <!--/Hero + Signup -->
+
+    <div class="hidden lg:block -mt-16">
+      <img class="w-full" src="@/assets/landing_home_side.svg" />
+    </div>
   </div>
 </template>
-
-<script>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-
-import Error from "@/components/Error.vue";
-import Link from "@/components/Link.vue";
-
-import SignupForm from "@/containers/SignupForm.vue";
-
-export default {
-  components: {
-    Error,
-    Link,
-
-    SignupForm,
-  },
-  setup() {
-    const router = useRouter();
-
-    const error = ref(false);
-
-    function onError(code) {
-      if (code === 40001) {
-        error.value = true;
-      }
-
-      if (code === 40002) {
-        router.replace("/auth/login");
-      }
-    }
-
-    return {
-      error,
-
-      onError,
-    };
-  },
-};
-</script>
