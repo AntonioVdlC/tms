@@ -9,6 +9,30 @@
       </div>
 
       <div class="mb-6 md:mb-0">
+        <h3 class="text-lg font-semibold">Company</h3>
+        <ul>
+          <li class="cursor-pointer hover:underline">
+            <a href="/about">About Us</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="mb-6 md:mb-0">
+        <h3 class="text-lg font-semibold">Resources</h3>
+        <ul>
+          <li class="cursor-pointer hover:underline">
+            <a href="/docs">Docs</a>
+          </li>
+          <li class="cursor-pointer hover:underline">
+            <a href="https://github.com/AntonioVdlC/tms">Contribute</a>
+          </li>
+          <li class="cursor-pointer hover:underline">
+            <a href="#">License</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="mb-6 md:mb-0">
         <h3 class="text-lg font-semibold">Language</h3>
         <ul>
           <li

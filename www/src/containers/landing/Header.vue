@@ -130,15 +130,23 @@
 
 <script>
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
-import { BookOpenIcon, MenuIcon, XIcon } from "@heroicons/vue/outline";
+import {
+  BookOpenIcon,
+  CodeIcon,
+  MenuIcon,
+  XIcon,
+} from "@heroicons/vue/outline";
 
 const menu = [
   {
     name: "Docs",
-    description:
-      "Learn how to maximize our platform to get the most out of it.",
     href: "/docs",
     icon: BookOpenIcon,
+  },
+  {
+    name: "Contribute",
+    href: "https://github.com/AntonioVdlC/tms",
+    icon: CodeIcon,
   },
 ];
 
