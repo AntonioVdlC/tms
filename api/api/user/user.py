@@ -9,7 +9,7 @@ from api.commons.common import UnknownSystemException
 from api.commons.user import UserNotFoundException
 
 
-blueprint = Blueprint('user', __name__, url_prefix='/user')
+blueprint = Blueprint('user', __name__, url_prefix='/user', template_folder='templates')
 
 
 @blueprint.route('', methods=['GET'])
