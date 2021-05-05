@@ -1,6 +1,6 @@
 import logging
 
-from flask import has_request_context, request
+from flask import has_request_context, request, current_app
 from flask.logging import default_handler
 
 
@@ -21,3 +21,4 @@ def init_log():
         '[%(asctime)s] %(module)s %(levelname)s: %(message)s'
     )
     default_handler.setFormatter(formatter)
+

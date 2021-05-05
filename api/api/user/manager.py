@@ -1,4 +1,3 @@
-from flask import current_app, g
 from pydantic import BaseModel, validator, EmailStr
 from pymongo.errors import PyMongoError, WriteError
 from redis.exceptions import RedisError, ConnectionError
@@ -8,6 +7,7 @@ from datetime import datetime
 from enum import Enum
 
 from api.utils.cache import get_cache, get_update_email_script
+from api.utils.app_wrapper import get_config, get_logger
 from api.user.exceptions import *
 from api.commons import user as user_commons
 from api.commons import organisation as organisation_commons
@@ -98,8 +98,8 @@ def update_user_email(user_id: str, request: UpdateEmailRequest):
                 set_update_email_cache(user_id, update_user_dict)
                 old_email_url = generate_callback_url(old_email_token, UpdateEmailType.old.value)
                 new_email_url = generate_callback_url(new_email_token, UpdateEmailType.new.value)
-                current_app.logger.info(f'Old email url: {old_email_url}')
-                current_app.logger.info(f'new email url: {new_email_url}')
+                get_logger().info(f'Old email url: {old_email_url}')
+                get_logger().info(f'new email url: {new_email_url}')
                 send_update_email_old(user.email, old_email_url)
                 send_update_email_new(new_email, new_email_url)
                 return {"message": "Emails sent for updating user email"}
@@ -121,7 +121,7 @@ def update_user_email_callback(user_id: str, request: UpdateEmailCallback):
         if update_email_info is None:
             raise UnknownUpdateEmailException(user_id)
         else:
-            current_app.logger.info(f'info: {update_email_info}')
+            get_logger().info(f'info: {update_email_info}')
             new_email = update_email_info['new_email']
             if request.email_type == UpdateEmailType.old:
                 key = str(update_email_info['old_email_token'])
@@ -134,17 +134,17 @@ def update_user_email_callback(user_id: str, request: UpdateEmailCallback):
             else:
                 raise UnknownEmailTypeException(request.token, request.email_type.value)
 
-            current_app.logger.info(f'key: {key}, other key: {other_key}, request token: {request.token}')
+            get_logger().info(f'key: {key}, other key: {other_key}, request token: {request.token}')
             if key != request.token:
-                current_app.logger.error('Illegal token..')
+                get_logger().error('Illegal token..')
                 raise IllegalUpdateTokenException(request.token)
 
             status = update_and_get_other_key_status(key, other_key)
             if status:
-                current_app.logger.info('Received callbacks from both emails.. proceeding to update email')
+                get_logger().info('Received callbacks from both emails.. proceeding to update email')
                 update_result = user_db.update_user_email(user_id, new_email)
                 if update_result.modified_count != 1:
-                    current_app.logger.error('did not update')
+                    get_logger().error('did not update')
                     raise common.UnknownSystemException(user_id)
 
                 user_commons.clear_user_cache(user_id)
@@ -158,7 +158,7 @@ def update_user_email_callback(user_id: str, request: UpdateEmailCallback):
             else:
                 return {"message": f"Received confirmation. Please double confirm from {other_email}"}
     except (PyMongoError, RedisError, ConnectionError) as e:
-        current_app.logger.exception('everything is wrong bro', extra={'stack': True})
+        get_logger().exception('everything is wrong bro', extra={'stack': True})
         raise common.UnknownSystemException(user_id)
 
 
@@ -174,13 +174,13 @@ def delete_user(user_id: str, token: str):
         delete_auth_token(token)
         user_commons.clear_user_cache(user_id)
     except (PyMongoError, RedisError, ConnectionError) as e:
-        current_app.logger.exception('everything is wrong bro', extra={'stack': True})
+        get_logger().exception('everything is wrong bro', extra={'stack': True})
         raise common.UnknownSystemException(user_id)
 
 
 def set_update_email_cache(user_id, update_user_dict):
     key = f'update_email_{user_id}'
-    get_cache().setex(key, current_app.config['UPDATE_EMAIL_TTL_SECS'], json.dumps(update_user_dict))
+    get_cache().setex(key, get_config()['UPDATE_EMAIL_TTL_SECS'], json.dumps(update_user_dict))
 
 
 def get_update_email_cache(user_id) -> dict:
@@ -192,24 +192,24 @@ def get_update_email_cache(user_id) -> dict:
 
 
 def generate_callback_url(token, email_type) -> str:
-    base_url = current_app.config['TMS_BASE_URL']
+    base_url = get_config()['TMS_BASE_URL']
     url = f'{base_url}/user/update/callback?token={token}&type={email_type}'
     return url
 
 
 def send_update_email_old(old_email: str, old_url: str):
-    current_app.logger.info('Sending email to old email')
+    get_logger().info('Sending email to old email')
     # TODO: antonio does his magic
 
 
 def send_update_email_new(new_email: str, new_url: str):
-    current_app.logger.info('Sending email to old email')
+    get_logger().info('Sending email to old email')
     # TODO: antonio does his magic
 
 
 def update_and_get_other_key_status(key: str, other_key: str) -> bool:
     script = get_update_email_script()
-    ttl: int = current_app.config['UPDATE_EMAIL_TTL_SECS']
+    ttl: int = get_config()['UPDATE_EMAIL_TTL_SECS']
     return script(keys=[key, other_key], args=[ttl, 1])
 
 

@@ -1,4 +1,3 @@
-from flask import current_app, g
 from pydantic import BaseModel, validator
 from pymongo.errors import WriteError, PyMongoError
 from redis.exceptions import RedisError, ConnectionError
@@ -10,6 +9,7 @@ from typing import Optional
 import uuid
 
 from api.utils.cache import get_cache
+from api.utils.app_wrapper import get_config, get_logger
 from api.project.exceptions import *
 from api.models.user import User, get_user_by_id
 from api.commons import user as user_commons
@@ -144,7 +144,7 @@ def get_project(org_id: str, user_id: str, proj_id: str) -> ProjectModel:
     user = user_commons.get_user(user_id)
 
     if str(organisation.object_id) in user.organisations:
-        current_app.logger.info('user access confirmed, getting project..')
+        get_logger().info('user access confirmed, getting project..')
         project = get_project_for_id(proj_id)
         return ProjectModel(project_name=project.name, project_id=str(project.object_id), langs=project.langs,
                             created_at=project.created_at, updated_at=project.updated_at)
@@ -162,7 +162,7 @@ def edit_project(org_id: str, user_id: str, proj_id: str, request: ProjectModel)
 
     if (str(organisation.object_id) in user.organisations) and \
             organisation_commons.check_if_admin(organisation, user_id):
-        current_app.logger.info('Editing projects..')
+        get_logger().info('Editing projects..')
         update_result = project_db.update_project(proj_id, request.project_name, request.langs)
         if update_result.modified_count != 1:
             raise common.UnknownSystemException(user_id)
@@ -188,7 +188,7 @@ def delete_project(org_id: str, user_id: str, proj_id: str):
 
         if (str(organisation.object_id) in user.organisations) and \
                 organisation_commons.check_if_admin(organisation, user_id):
-            current_app.logger.info('Deleting project..')
+            get_logger().info('Deleting project..')
             delete_result = project_db.soft_delete_project(proj_id)
             if delete_result.modified_count != 1:
                 raise common.UnknownSystemException(user_id)
@@ -265,7 +265,7 @@ def get_key(org_id: str, user_id: str, proj_id: str, key_id: str) -> KeyModel:
 
         if (str(organisation.object_id) in user.organisations) and \
                 organisation_commons.check_if_dev_and_above(organisation, user_id):
-            current_app.logger.info('getting key..')
+            get_logger().info('getting key..')
             key = None
             for k in project.keys:
                 if k.key_id == key_id:
@@ -303,7 +303,7 @@ def edit_key(org_id: str, user_id: str, proj_id: str, key_id: str, request: KeyR
                     existing_key = key
                 if key.name == key_name and key.key_id != key_id:
                     raise DuplicateKeyNameException(key_name)
-            current_app.logger.info(f'existing key id: {existing_key.key_id} is deleted: {existing_key.is_deleted}')
+            get_logger().info(f'existing key id: {existing_key.key_id} is deleted: {existing_key.is_deleted}')
             if existing_key is None:
                 raise KeyNotFoundException(key_id)
             if existing_key.is_deleted:
@@ -324,7 +324,7 @@ def edit_key(org_id: str, user_id: str, proj_id: str, key_id: str, request: KeyR
         else:
             raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
     except (PyMongoError, RedisError) as ex:
-        current_app.logger.info("Error", ex)
+        get_logger().info("unknown system error")
         raise common.UnknownSystemException(user_id)
 
 
@@ -339,7 +339,7 @@ def delete_key(org_id: str, user_id: str, proj_id: str, key_id: str):
 
         if (str(organisation.object_id) in user.organisations) and \
                 organisation_commons.check_if_admin(organisation, user_id):
-            current_app.logger.info('Deleting key..')
+            get_logger().info('Deleting key..')
             existing_key = None
             for key in project.keys:
                 if key.key_id == key_id:
@@ -359,7 +359,7 @@ def delete_key(org_id: str, user_id: str, proj_id: str, key_id: str):
         else:
             raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
     except (PyMongoError, RedisError) as ex:
-        current_app.logger.info("Error", ex)
+        get_logger().info("unknown system error")
         raise common.UnknownSystemException(user_id)
 
 
@@ -369,7 +369,7 @@ def get_projects_for_org(org_id: str) -> list:
     if cached_values is None:
         projects = project_db.get_projects_by_org_id(org_id)
         project_dicts = list(map(lambda project: project.as_dict(to_cache=True), projects))
-        get_cache().setex(key, current_app.config['CACHE_TTL_SECS'], json.dumps(project_dicts))
+        get_cache().setex(key, get_config()['CACHE_TTL_SECS'], json.dumps(project_dicts))
         return projects
     else:
         projects = list(map(lambda project_dict: project_db.Project.from_dict(project_dict, from_cache=True),
@@ -384,7 +384,7 @@ def get_project_for_id(proj_id: str) -> project_db.Project:
         project = project_db.get_project_by_id(proj_id)
         if project is None:
             raise ProjectNotFoundException(proj_id)
-        get_cache().setex(key, current_app.config['CACHE_TTL_SECS'], json.dumps(project.as_dict(to_cache=True)))
+        get_cache().setex(key, get_config()['CACHE_TTL_SECS'], json.dumps(project.as_dict(to_cache=True)))
     else:
         project_dict = json.loads(cached_project_str)
         project = project_db.Project.from_dict(project_dict, from_cache=True)

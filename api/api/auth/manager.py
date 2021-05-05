@@ -1,4 +1,3 @@
-from flask import current_app
 from pydantic import BaseModel, EmailStr, validator
 from pymongo.errors import DuplicateKeyError
 from redis.exceptions import ConnectionError, TimeoutError
@@ -8,6 +7,7 @@ import json
 from enum import Enum
 
 from api.utils.cache import get_cache, get_token_generation_script
+from api.utils.app_wrapper import get_config, get_logger
 from api.models.user import get_user_by_email, insert_user
 from api.auth.exceptions import *
 from api.commons.user import InvalidNameException, UserNotFoundException, generate_unique_hash
@@ -62,12 +62,12 @@ def signup(request: SignupRequest):
         send_signup_email(signup_url)
         return {"message": "Please check email to complete sign up flow"}
     else:
-        current_app.logger.warn(f"Already an existing user for: {email} with id: {existing_user.object_id}")
+        get_logger().warn(f"Already an existing user for: {email} with id: {existing_user.object_id}")
         raise DuplicateSignupException(email)
 
 
 def login(request: LoginRequest):
-    current_app.logger.info('Logging in user: ' + request.email)
+    get_logger().info('Logging in user: ' + request.email)
     email = str(request.email)
     user = get_user_by_email(email)
     if user is None:
@@ -82,7 +82,7 @@ def login(request: LoginRequest):
 
 
 def callback(request: CallbackRequest) -> AuthTokenResponse:
-    current_app.logger.info(f'Completing auth flow for token: {request.token}, operation: {request.operation}')
+    get_logger().info(f'Completing auth flow for token: {request.token}, operation: {request.operation}')
     user_info = get_auth_user_info(request.token)
     if user_info is None:
         raise InvalidTokenException(request.token)
@@ -93,7 +93,7 @@ def callback(request: CallbackRequest) -> AuthTokenResponse:
             try:
                 user = insert_user(user_info['email'], user_info['first_name'], user_info['last_name'])
             except DuplicateKeyError as e:
-                current_app.logger.warn(f"signup request attempted for an existing email: {email}")
+                get_logger().warn(f"signup request attempted for an existing email: {email}")
                 raise DuplicateSignupException(email)
             user_id = str(user.object_id)
         elif request.operation == Operation.login:
@@ -104,7 +104,7 @@ def callback(request: CallbackRequest) -> AuthTokenResponse:
         else:
             raise InvalidOperationException(f'Unknown operation: {request.operation}')
         auth_token = str(uuid.uuid4())
-        current_app.logger.info(f"auth_token: {auth_token}, object_id: {user_id}")
+        get_logger().info(f"auth_token: {auth_token}, object_id: {user_id}")
         set_auth_token(auth_token, user_id)
         delete_token_email(email, request.token)
         return AuthTokenResponse(token=auth_token)
@@ -119,25 +119,25 @@ def logout(token: str):
 
 def set_token(email: str, token: str, user_info: str):
     script = get_token_generation_script()
-    ttl: int = int(current_app.config['SIGNUP_TTL_SECS'])
-    current_app.logger.info(f'email: {email}, token: {token}, user_info: {user_info}, ttl: {ttl}')
+    ttl: int = int(get_config()['SIGNUP_TTL_SECS'])
+    get_logger().info(f'email: {email}, token: {token}, user_info: {user_info}, ttl: {ttl}')
     script(keys=[email, token], args=[token, user_info, ttl])
 
 
 def generate_callback_url(token: str, operation: str) -> str:
     url = '{base_url}/auth/callback?token={token}&operation={operation}' \
-        .format(base_url=current_app.config['TMS_BASE_URL'], operation=operation, token=token)
+        .format(base_url=get_config()['TMS_BASE_URL'], operation=operation, token=token)
     return url
 
 
 def send_signup_email(signup_url: str):
     # TODO: send email using flask email and jinja templates. its all yours antonio :hugging_face:
-    current_app.logger.info(f'Sending email for url: {signup_url}')
+    get_logger().info(f'Sending email for url: {signup_url}')
 
 
 def send_login_email(login_url: str):
     # TODO: send email using flask email and jinja templates. its all yours antonio :hugging_face:
-    current_app.logger.info(f'Sending email for url: {login_url}')
+    get_logger().info(f'Sending email for url: {login_url}')
 
 
 def get_auth_user_info(token: str):
@@ -148,7 +148,7 @@ def get_auth_user_info(token: str):
 
 
 def set_auth_token(token: str, user_id: str):
-    get_cache().setex(token, current_app.config['SESSION_TTL_SECS'], user_id)
+    get_cache().setex(token, get_config()['SESSION_TTL_SECS'], user_id)
 
 
 def delete_token_email(email: str, token: str):

@@ -16,7 +16,7 @@ def create_organisation():
     # does not stop you from creating multiple organisations by the same name.
     try:
         create_organisation_request = manager.OrganisationRequest(**request.json)
-        create_organisation_response = manager.create_organisation(create_organisation_request)
+        create_organisation_response = manager.create_organisation(g.user_id, create_organisation_request)
         return jsonify(create_organisation_response.dict())
     except ValidationError as e:
         current_app.logger.error('Issue with json body')

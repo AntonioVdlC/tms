@@ -1,4 +1,3 @@
-from flask import current_app, g
 from pydantic import BaseModel, validator
 from bson.objectid import ObjectId
 from pymongo.errors import WriteError, PyMongoError
@@ -8,6 +7,7 @@ from datetime import datetime
 import json
 
 from api.utils.cache import get_cache
+from api.utils.app_wrapper import get_config, get_logger
 from api.organisation.exceptions import *
 from api.models.user import add_organisation_to_user, User, get_user_by_id
 from api.models.organisation import *
@@ -41,20 +41,21 @@ class GetOrganisationResponse(BaseModel):
     is_deleted: bool
 
 
-def create_organisation(request: OrganisationRequest) -> OrganisationResponse:
+def create_organisation(user_id: str, request: OrganisationRequest) -> OrganisationResponse:
     organisation_name = str(request.organisation_name)
+    user = user_commons.get_user(user_id)
     try:
         object_id = ObjectId()
-        current_app.logger.info(f'Adding organisation with name {organisation_name} by user {g.user_id} with '
-                                f'object id {str(object_id)}')
+        get_logger().info(f'Adding organisation with name {organisation_name} by user {user_id} with '
+                          f'object id {str(object_id)}')
         with get_client().start_session() as session:
             with session.start_transaction():
-                organisation = insert_organisation(organisation_name, g.user_id, object_id, session)
-                add_organisation_to_user(g.user_id, str(organisation.object_id), session)
-        user_commons.clear_user_cache(g.user_id)
+                organisation = insert_organisation(organisation_name, user_id, object_id, session)
+                add_organisation_to_user(user_id, str(organisation.object_id), session)
+        user_commons.clear_user_cache(user_id)
     except WriteError as we:
-        current_app.logger.error(f'issue creating organisation, org name: {organisation_name}. creator_id: {g.user_id}')
-        raise OrganisationCreationException(organisation_name, g.user_id)
+        get_logger().error(f'issue creating organisation, org name: {organisation_name}. creator_id: {user_id}')
+        raise OrganisationCreationException(organisation_name, user_id)
 
     response = OrganisationResponse(organisation_name=organisation.name,
                                     organisation_id=str(organisation.object_id),
@@ -89,7 +90,7 @@ def get_organisation_for_user(organisation_id: str, user_id: str) -> GetOrganisa
     user = user_commons.get_user(user_id)
 
     if organisation_id in user.organisations:
-        current_app.logger.info('User has access to organisation..')
+        get_logger().info('User has access to organisation..')
         response: GetOrganisationResponse = GetOrganisationResponse(organisation_name=organisation.name,
                                                                     organisation_id=str(organisation.object_id),
                                                                     created_at=organisation.created_at,
@@ -109,7 +110,7 @@ def edit_organisation(request: OrganisationRequest, organisation_id: str, user_i
 
     if (str(organisation.object_id) in user.organisations) and \
             organisation_commons.check_if_admin(organisation, user_id):
-        current_app.logger.info('Editing organisation..')
+        get_logger().info('Editing organisation..')
         update_result = update_organisation(organisation_id, request.organisation_name)
         if update_result.modified_count != 1:
             raise common.UnknownSystemException(user_id)
@@ -131,7 +132,7 @@ def delete_organisation(organisation_id: str, user_id: str):
 
     if (str(organisation.object_id) in user.organisations) and \
             organisation_commons.check_if_admin(organisation, user_id):
-        current_app.logger.info('Deleting organisation..')
+        get_logger().info('Deleting organisation..')
         delete_result = soft_delete_organisation(organisation_id)
         if delete_result.modified_count != 1:
             raise common.UnknownSystemException(user_id)
@@ -156,7 +157,7 @@ def get_organisations_by_ids(org_ids: list):
     pipeline = get_cache().pipeline()
     for uncached_organisation in uncached_organisations:
         key = f'org_{str(uncached_organisation.object_id)}'
-        pipeline.setex(key, current_app.config['CACHE_TTL_SECS'],
+        pipeline.setex(key, get_config()['CACHE_TTL_SECS'],
                        json.dumps(uncached_organisation.as_dict(to_cache=True)))
     pipeline.execute()
     organisations = cached_organisations + uncached_organisations
