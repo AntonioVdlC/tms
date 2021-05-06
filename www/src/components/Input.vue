@@ -1,21 +1,27 @@
 <template>
   <div class="text-left">
-    <label class="block">
-      <span class="text-gray-700">{{ label }}</span>
-      <input
-        class="mt-0 block w-full px-2 border-0 border-b-2 focus:ring-0"
-        :class="[
-          error ? 'border-red-700' : 'border-gray-200 focus:border-black',
-        ]"
-        :type="type"
-        :placeholder="placeholder"
-        :value="value"
-        @input="$emit('update:value', $event.target.value)"
-        @blur="onBlur"
-        @focus="onFocus"
-      />
+    <label
+      :for="id"
+      class="block text-gray-700"
+      :class="showLabel ? '' : 'sr-only'"
+    >
+      {{ label }}
     </label>
-    <p class="text-red-700 text-xs mt-0.5" :class="{ invisible: !error }">
+    <input
+      :id="id"
+      class="appearance-none relative block w-full px-3 py-2 border placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 focus:z-10 sm:text-sm"
+      :class="[error ? 'border-red-700' : 'border-gray-300']"
+      :type="type"
+      :placeholder="placeholder"
+      :value="value"
+      @input="$emit('update:value', $event.target.value)"
+      @blur="onBlur"
+      @focus="onFocus"
+    />
+    <p
+      class="text-red-700 text-xs mt-0.5 ml-1.5"
+      :class="{ invisible: !error }"
+    >
       {{ errorMessage }}
     </p>
   </div>
@@ -26,6 +32,16 @@ import { ref, watch } from "vue";
 
 export default {
   props: {
+    id: {
+      type: String,
+      default: () => {
+        return btoa(Math.random()).slice(0, 12); // Random ID
+      },
+    },
+    showLabel: {
+      type: Boolean,
+      default: false,
+    },
     label: {
       type: String,
       required: true,
