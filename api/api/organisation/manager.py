@@ -109,7 +109,7 @@ def edit_organisation(request: OrganisationRequest, organisation_id: str, user_i
     user = user_commons.get_user(user_id)
 
     if (str(organisation.object_id) in user.organisations) and \
-            organisation_commons.check_if_admin(organisation, user_id):
+            organisation_commons.check_if_admin_and_above(organisation, user_id):
         get_logger().info('Editing organisation..')
         update_result = update_organisation(organisation_id, request.organisation_name)
         if update_result.modified_count != 1:
@@ -131,7 +131,7 @@ def delete_organisation(organisation_id: str, user_id: str):
     user = user_commons.get_user(user_id)
 
     if (str(organisation.object_id) in user.organisations) and \
-            organisation_commons.check_if_admin(organisation, user_id):
+            organisation_commons.check_if_admin_and_above(organisation, user_id):
         get_logger().info('Deleting organisation..')
         delete_result = soft_delete_organisation(organisation_id)
         if delete_result.modified_count != 1:

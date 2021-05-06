@@ -38,10 +38,11 @@ def get_organisation_by_id(org_id: str) -> Organisation:
     return organisation
 
 
-def check_if_admin(organisation, user_id) -> bool:
+def check_if_admin_and_above(organisation, user_id) -> bool:
     flag = False
     for member in organisation.members:
-        if (member.user_id == user_id) and (member.member_type == MemberType.admin):
+        if (member.user_id == user_id) and (member.member_type == MemberType.owner or
+                                            member.member_type == MemberType.admin):
             flag = True
             break
     return flag

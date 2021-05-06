@@ -96,7 +96,7 @@ def create_project(org_id: str, user_id: str, request: ProjectRequest) -> Projec
         user = user_commons.get_user(user_id)
 
         if (str(organisation.object_id) in user.organisations) and \
-                organisation_commons.check_if_admin(organisation, user_id):
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
             existing_project_names = list(map(lambda p: p.name, get_projects_for_org(org_id)))
             if request.project_name.strip() in existing_project_names:
                 raise DuplicateProjectNameException(request.project_name)
@@ -161,7 +161,7 @@ def edit_project(org_id: str, user_id: str, proj_id: str, request: ProjectModel)
     existing_project = get_project_for_id(proj_id)
 
     if (str(organisation.object_id) in user.organisations) and \
-            organisation_commons.check_if_admin(organisation, user_id):
+            organisation_commons.check_if_admin_and_above(organisation, user_id):
         get_logger().info('Editing projects..')
         update_result = project_db.update_project(proj_id, request.project_name, request.langs)
         if update_result.modified_count != 1:
@@ -187,7 +187,7 @@ def delete_project(org_id: str, user_id: str, proj_id: str):
         project = get_project_for_id(proj_id)
 
         if (str(organisation.object_id) in user.organisations) and \
-                organisation_commons.check_if_admin(organisation, user_id):
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
             get_logger().info('Deleting project..')
             delete_result = project_db.soft_delete_project(proj_id)
             if delete_result.modified_count != 1:
@@ -221,7 +221,7 @@ def create_key(org_id: str, user_id: str, proj_id: str, request: KeyRequest) -> 
             raise DuplicateKeyNameException(key_name)
 
         if (str(organisation.object_id) in user.organisations) and \
-                organisation_commons.check_if_admin(organisation, user_id):
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
             key = project_db.add_key(proj_id, key_name, key_description, generated_key, user_id)
             clear_project_cache(proj_id)
             return KeyModel(key_id=key.key_id, name=key.name, description=key.description, key=key.key,
@@ -296,7 +296,7 @@ def edit_key(org_id: str, user_id: str, proj_id: str, key_id: str, request: KeyR
         project = get_project_for_id(proj_id)
 
         if (str(organisation.object_id) in user.organisations) and \
-                organisation_commons.check_if_admin(organisation, user_id):
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
             existing_key = None
             for key in project.keys:
                 if key.key_id == key_id:
@@ -338,7 +338,7 @@ def delete_key(org_id: str, user_id: str, proj_id: str, key_id: str):
         project = get_project_for_id(proj_id)
 
         if (str(organisation.object_id) in user.organisations) and \
-                organisation_commons.check_if_admin(organisation, user_id):
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
             get_logger().info('Deleting key..')
             existing_key = None
             for key in project.keys:

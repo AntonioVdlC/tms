@@ -12,6 +12,26 @@ from api.commons.user import UserNotFoundException
 blueprint = Blueprint('member', __name__, url_prefix='/organisations/<string:org_id>/members')
 
 
-@blueprint.route('', methods=['GET'])
+@blueprint.route('', methods=['POST'])
 def get_members(org_id: str):
-    return {"message": f"get members for {org_id}"}
+    try:
+        add_member_request = manager.AddMemberRequest(**request.json)
+        response = manager.add_member(org_id, g.user_id, add_member_request)
+        return jsonify(response)
+    except ValidationError as e:
+        current_app.logger.error('Issue with json body')
+        return jsonify({"error": "Issue creating project", "code": 40016}), 400
+    except UserNotFoundException as ex:
+        current_app.logger.error(f'User not found for id: {ex.user_id}')
+        return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40444}), 404
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40445}), 404
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40446}), 404
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "No access to organisation", "code": 40114}), 401
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exception", "code": 50014}), 500

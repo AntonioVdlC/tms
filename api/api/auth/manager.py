@@ -96,6 +96,7 @@ def callback(request: CallbackRequest) -> AuthTokenResponse:
                 get_logger().warn(f"signup request attempted for an existing email: {email}")
                 raise DuplicateSignupException(email)
             user_id = str(user.object_id)
+            # TODO: run through invites and add user to all organisations
         elif request.operation == Operation.login:
             try:
                 user_id = str(user_info['_id'])

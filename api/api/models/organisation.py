@@ -9,6 +9,7 @@ from api.utils.db import get_db
 
 
 class MemberType(str, Enum):
+    owner = 'owner'
     admin = 'admin'
     developer = 'developer'
     translator = 'translator'
@@ -81,7 +82,7 @@ class Organisation(object):
 
 def insert_organisation(name: str, creator_id: str, object_id: ObjectId, session):
     created_at = updated_at = added_at = datetime.utcnow()
-    members = [Member(creator_id, MemberType.admin, added_at)]
+    members = [Member(creator_id, MemberType.owner, added_at)]
     organisation = Organisation(name, members, creator_id, created_at, updated_at, False, object_id)
     result: InsertOneResult = get_db().organisations.insert_one(organisation.as_dict(), session=session)
     return organisation
@@ -110,6 +111,19 @@ def update_organisation(org_id: str, name: str) -> UpdateResult:
                                   'updated_at': datetime.utcnow()}},
                         upsert=False)
     return result
+
+
+def add_member_to_organisation(org_id: str, member_id: str, member_type: MemberType, session):
+    updated_at = added_at = datetime.utcnow()
+    member = Member(user_id=member_id, member_type=member_type, added_at=added_at)
+    result: UpdateResult = get_db().organisations.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({'_id': ObjectId(org_id)},
+                    {'$push': {'members': member.as_dict()},
+                     '$set': {'updated_at': updated_at}},
+                    upsert=False,
+                    session=session)
+    return result
+
 
 
 def soft_delete_organisation(org_id: str) -> UpdateResult:
