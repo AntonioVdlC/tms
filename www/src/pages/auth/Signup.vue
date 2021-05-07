@@ -48,7 +48,7 @@ export default {
   setup() {
     const router = useRouter();
 
-    const error = ref(true);
+    const error = ref(false);
 
     function onError(code) {
       if (code === 40001) {
