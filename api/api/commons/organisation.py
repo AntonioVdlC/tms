@@ -48,6 +48,15 @@ def check_if_admin_and_above(organisation, user_id) -> bool:
     return flag
 
 
+def check_if_owner(organisation, user_id) -> bool:
+    flag = False
+    for member in organisation.members:
+        if (member.user_id == user_id) and (member.member_type == MemberType.owner):
+            flag = True
+            break
+    return flag
+
+
 def check_if_dev_and_above(organisation, user_id) -> bool:
     flag = False
     for member in organisation.members:
@@ -61,3 +70,8 @@ def check_if_dev_and_above(organisation, user_id) -> bool:
 def clear_org_cache(org_id: str):
     key = f'org_{org_id}'
     get_cache().delete(key)
+
+
+def clear_orgs_cache(org_ids: list):
+    keys = list(map(lambda org_id: f'org_{org_id}', org_ids))
+    get_cache().delete(*keys)

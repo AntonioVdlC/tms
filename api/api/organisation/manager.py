@@ -9,7 +9,7 @@ import json
 from api.utils.cache import get_cache
 from api.utils.app_wrapper import get_config, get_logger
 from api.organisation.exceptions import *
-from api.models.user import add_organisation_to_user, User, get_user_by_id
+from api.models.user import add_organisations_to_user, User, get_user_by_id
 from api.models.organisation import *
 from api.utils.db import get_client
 from api.commons import user as user_commons
@@ -51,7 +51,7 @@ def create_organisation(user_id: str, request: OrganisationRequest) -> Organisat
         with get_client().start_session() as session:
             with session.start_transaction():
                 organisation = insert_organisation(organisation_name, user_id, object_id, session)
-                add_organisation_to_user(user_id, str(organisation.object_id), session)
+                add_organisations_to_user(user_id, [str(organisation.object_id)], session)
         user_commons.clear_user_cache(user_id)
     except WriteError as we:
         get_logger().error(f'issue creating organisation, org name: {organisation_name}. creator_id: {user_id}')

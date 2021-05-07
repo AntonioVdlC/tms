@@ -12,7 +12,7 @@ from api.commons.user import UserNotFoundException
 blueprint = Blueprint('member', __name__, url_prefix='/organisations/<string:org_id>/members')
 
 
-@blueprint.route('', methods=['POST'])
+@blueprint.route('', methods=['PUT'])
 def get_members(org_id: str):
     try:
         add_member_request = manager.AddMemberRequest(**request.json)
@@ -30,8 +30,11 @@ def get_members(org_id: str):
     except DeletedOrganisationAccessException as ex:
         current_app.logger.warn(f"Access to deleted organisation: {org_id}")
         return jsonify({"error": "Accessing deleted organisations", "code": 40446}), 404
+    except InsufficientOwnerAccessException as ex:
+        current_app.logger.warn(f'Trying to add owner with insufficient permission: {ex.user_id}')
+        return jsonify({"error": "Only an owner can add another owner", "code": 40114}), 401
     except OrganisationIllegalAccessException as ex:
         current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
-        return jsonify({"error": "No access to organisation", "code": 40114}), 401
+        return jsonify({"error": "Not enough permissions to perform action", "code": 40115}), 401
     except UnknownSystemException as e:
         return jsonify({"error": "Unknown system exception", "code": 50014}), 500

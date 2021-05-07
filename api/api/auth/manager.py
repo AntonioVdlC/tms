@@ -7,10 +7,14 @@ import json
 from enum import Enum
 
 from api.utils.cache import get_cache, get_token_generation_script
+from api.utils.db import get_client
 from api.utils.app_wrapper import get_config, get_logger
-from api.models.user import get_user_by_email, insert_user
+from api.models import user as user_db
+from api.models import organisation as organisation_db
+from api.models import invite as invite_db
 from api.auth.exceptions import *
 from api.commons.user import InvalidNameException, UserNotFoundException, generate_unique_hash
+from api.commons import organisation as organisation_commons
 
 
 class SignupRequest(BaseModel):
@@ -54,7 +58,7 @@ class AuthTokenResponse(BaseModel):
 
 def signup(request: SignupRequest):
     email = str(request.email)
-    existing_user = get_user_by_email(email)
+    existing_user = user_db.get_user_by_email(email)
     if existing_user is None:
         token: str = generate_unique_hash(email)
         set_token(email, token, json.dumps(request.dict()))
@@ -69,7 +73,7 @@ def signup(request: SignupRequest):
 def login(request: LoginRequest):
     get_logger().info('Logging in user: ' + request.email)
     email = str(request.email)
-    user = get_user_by_email(email)
+    user = user_db.get_user_by_email(email)
     if user is None:
         raise UnknownEmailException(email)
     else:
@@ -91,12 +95,29 @@ def callback(request: CallbackRequest) -> AuthTokenResponse:
         email: str = user_info['email']
         if request.operation == Operation.signup:
             try:
-                user = insert_user(user_info['email'], user_info['first_name'], user_info['last_name'])
+                user = user_db.insert_user(user_info['email'], user_info['first_name'], user_info['last_name'])
             except DuplicateKeyError as e:
                 get_logger().warn(f"signup request attempted for an existing email: {email}")
                 raise DuplicateSignupException(email)
             user_id = str(user.object_id)
             # TODO: run through invites and add user to all organisations
+            invites = invite_db.get_invites_by_email(email)
+            if len(invites) > 0:
+                org_ids = []
+                invite_ids = []
+                with get_client().start_session() as session:
+                    with session.start_transaction():
+                        for invite in invites:
+                            organisation_db.add_member_to_organisation(invite.org_id, user_id,
+                                                                       invite.member_type, session)
+                            org_ids.append(invite.org_id)
+                            invite_db.soft_delete_invite(invite.object_id, session)
+                        user_db.add_organisations_to_user(user_id, org_ids, session)
+                        get_logger().info(f'invite ids: {invite_ids}, org_ids: {org_ids}')
+
+                organisation_commons.clear_orgs_cache(org_ids)
+            else:
+                get_logger().info(f'No pending invites for {email}')
         elif request.operation == Operation.login:
             try:
                 user_id = str(user_info['_id'])

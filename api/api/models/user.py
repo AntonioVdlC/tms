@@ -73,9 +73,11 @@ def insert_user(email: str, first_name: str, last_name: str) -> User:
     return user
 
 
-def add_organisation_to_user(user_id: str, org_id: str, session):
+def add_organisations_to_user(user_id: str, org_ids: list, session):
     get_db().users.with_options(write_concern=WriteConcern(w="majority"))\
-        .update_one({'_id': ObjectId(user_id)}, {'$push': {'organisations': org_id}}, session=session)
+        .update_one({'_id': ObjectId(user_id)},
+                    {'$addToSet': {'organisations': {'$each': org_ids}}},
+                    session=session)
 
 
 def update_user_details(user_id: str, first_name: str, last_name: str) -> UpdateResult:

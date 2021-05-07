@@ -41,26 +41,36 @@ def add_member(org_id: str, user_id: str, request: AddMemberRequest):
 
         if (str(organisation.object_id) in user.organisations) and \
                 organisation_commons.check_if_admin_and_above(organisation, user_id):
+            if request.member_type == organisation_db.MemberType.owner and not \
+                    organisation_commons.check_if_owner(organisation, user_id):
+                raise InsufficientOwnerAccessException(user_id)
+
             member_email = str(request.email)
-            existing_member = user_db.get_user_by_email(member_email)
+            existing_member: user_db.User = user_db.get_user_by_email(member_email)
             if existing_member is None:
                 get_logger().info('Member not present.. creating an invite entry for later resolution')
-                invite_db.add_invite(member_email, org_id, request.member_type)
+                invite_db.update_or_add_invite(member_email, org_id, request.member_type)
                 send_member_signup_email(member_email, organisation.name)
                 return {"message": "Member requested to signup"}
             else:
                 get_logger().info('Member present.. proceeding to add to organisation')
-                with get_client().start_session() as session:
-                    with session.start_transaction():
-                        user_db.add_organisation_to_user(str(existing_member.object_id), org_id, session)
-                        organisation_db.add_member_to_organisation(org_id,
-                                                                   str(existing_member.object_id),
-                                                                   request.member_type,
-                                                                   session)
-                return {"message": "Member added to organisation and notified"}
+                member_ids = list(map(lambda member: member.user_id, organisation.members))
+                if str(existing_member.object_id) in member_ids:
+                    get_logger().warn('User already in members list..')
+                    return {"message": "User already in members list"}
+                else:
+                    with get_client().start_session() as session:
+                        with session.start_transaction():
+                            user_db.add_organisations_to_user(str(existing_member.object_id), [org_id], session)
+                            organisation_db.add_member_to_organisation(org_id,
+                                                                       str(existing_member.object_id),
+                                                                       request.member_type,
+                                                                       session)
+                    return {"message": "Member added to organisation and notified"}
         else:
             raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
     except (PyMongoError, RedisError, ConnectionError) as e:
+        get_logger().exception("error in mongo", extra={'stack': True})
         raise common.UnknownSystemException(user_id)
 
 
