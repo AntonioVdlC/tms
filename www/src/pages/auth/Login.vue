@@ -17,9 +17,7 @@
   </div>
 
   <div class="mt-8 space-y-6">
-    <div class="rounded-md shadow-sm -space-y-px">
-      <LoginForm @success="onSuccess" @error="onError" />
-    </div>
+    <LoginForm @success="onSuccess" @error="onError" />
     <p class="text-sm text-left">
       You will receive a magic link in your inbox which you can use to access
       your account.
