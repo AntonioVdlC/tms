@@ -1,6 +1,20 @@
 <template>
   <div>
-    A magic link has been sent to <span>{{ email }}</span>
+    <img class="mx-auto h-12 w-auto" src="@/assets/logo_icon.png" alt="TMS" />
+    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      A magic link has been sent to
+      <span class="font-medium text-yellow-600">{{ email }}</span>
+    </h2>
+    <p class="mt-8 text-sm text-gray-600">
+      If you haven't received an email, please click
+      <a
+        href="/auth/login"
+        class="text-yellow-600 hover:underline cursor-pointer"
+      >
+        here
+      </a>
+      to sign in again.
+    </p>
   </div>
 </template>
 

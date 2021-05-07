@@ -1,11 +1,27 @@
 <template>
-  <div class="bg-yellow-500 w-screen h-screen">
-    <div class="h-screen m-auto py-16 md:py-32">
-      <div class="text-left w-3/4 md:w-1/3 m-auto">
-        <h2 class="text-2xl font-semibold text-white mb-4">Login</h2>
-        <LoginForm @error="onError" />
-      </div>
-    </div>
+  <div>
+    <img class="mx-auto h-12 w-auto" src="@/assets/logo_icon.png" alt="TMS" />
+    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      Sign in to your account
+    </h2>
+    <p class="mt-2 text-center text-sm text-gray-600">
+      Or
+      {{ " " }}
+      <a
+        href="/auth/signup"
+        class="font-medium text-yellow-600 hover:text-yellow-500"
+      >
+        create an account
+      </a>
+    </p>
+  </div>
+
+  <div class="mt-8 space-y-6">
+    <LoginForm @success="onSuccess" @error="onError" />
+    <p class="text-sm text-left">
+      You will receive a magic link in your inbox which you can use to access
+      your account.
+    </p>
   </div>
 </template>
 
@@ -21,6 +37,10 @@ export default {
   setup() {
     const router = useRouter();
 
+    function onSuccess() {
+      router.push("/auth/login/sent");
+    }
+
     function onError(code) {
       if (code === 40003) {
         router.replace("/auth/signup");
@@ -28,6 +48,7 @@ export default {
     }
 
     return {
+      onSuccess,
       onError,
     };
   },

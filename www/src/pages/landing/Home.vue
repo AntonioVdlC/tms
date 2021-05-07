@@ -1,73 +1,30 @@
 <template>
-  <div>
-    <!-- Hero + Signup -->
-    <div class="grid grid-cols-1 md:grid-cols-2 md:gap-8 mb-8">
-      <div class="pt-8 mb-8 md:text-left md:mb-0">
-        <h1 class="text-4xl font-bold">Translate your products easily!</h1>
-        <p class="mt-4 text-2xl">
-          TMS allows you and your team to easily translate products and manage
-          internationalization.
-        </p>
-
-        <img class="mt-8" src="@/assets/landing_home_main.svg" />
-      </div>
-
-      <div class="bg-yellow-500 py-8">
-        <div class="text-left w-3/4 m-auto">
-          <h2 class="text-2xl font-semibold text-white mb-4">Signup</h2>
-          <SignupForm @error="onError" />
-          <Error v-show="error" class="mt-4">
-            Oops, something is wrong with the data you entered. Can you
-            double-check please? :)
-          </Error>
-          <p class="text-white mt-4 text-md">
-            Already have an account?
-            <Link href="/auth/login">Login</Link>
-            instead!
-          </p>
-        </div>
-      </div>
-    </div>
-    <!--/Hero + Signup -->
-  </div>
+  <HomeHero />
+  <Space :size="12" />
+  <HomePricing />
+  <Space :size="4" />
+  <HomeFeatures />
+  <Space :size="4" />
+  <HomeCTA />
 </template>
 
 <script>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import HomeCTA from "@/containers/landing/HomeCTA.vue";
+import HomeFeatures from "@/containers/landing/HomeFeatures.vue";
+import HomeHero from "@/containers/landing/HomeHero.vue";
+import HomePricing from "@/containers/landing/HomePricing.vue";
 
-import Error from "@/components/Error.vue";
-import Link from "@/components/Link.vue";
-
-import SignupForm from "@/containers/SignupForm.vue";
+import Space from "@/components/Space.vue";
 
 export default {
   components: {
-    Error,
-    Link,
+    HomeCTA,
+    HomeFeatures,
+    HomeHero,
+    HomePricing,
 
-    SignupForm,
+    Space,
   },
-  setup() {
-    const router = useRouter();
-
-    const error = ref(false);
-
-    function onError(code) {
-      if (code === 40001) {
-        error.value = true;
-      }
-
-      if (code === 40002) {
-        router.replace("/auth/login");
-      }
-    }
-
-    return {
-      error,
-
-      onError,
-    };
-  },
+  setup() {},
 };
 </script>
