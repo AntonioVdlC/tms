@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="bg-white bg-opacity-75 backdrop-blur-md border-transparent border-2 rounded-lg p-4 grid grid-cols-1 gap-1 shadow-md"
-  >
+  <div>
     <Input
       ref="inputEmail"
       v-model:value="email"
@@ -10,6 +8,8 @@
       placeholder="jane.doe@email.com"
       required
     />
+
+    <Space :size="2" />
 
     <Input
       ref="inputFirstName"
@@ -20,6 +20,8 @@
       required
     />
 
+    <Space :size="2" />
+
     <Input
       ref="inputLastName"
       v-model:value="lastName"
@@ -29,29 +31,35 @@
       required
     />
 
-    <Button class="mt-2" type="primary" @click="submit">Submit</Button>
+    <Button
+      class="mt-2 group relative w-full flex justify-center"
+      type="primary"
+      @click="submit"
+    >
+      Submit
+    </Button>
   </div>
 </template>
 
 <script>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
 import { AUTH_ACTION_SIGNUP, AUTH_GETTER_EMAIL } from "@/store/types";
 
 import Button from "@/components/Button.vue";
 import Input from "@/components/Input.vue";
+import Space from "@/components/Space.vue";
 
 export default {
   components: {
     Button,
     Input,
+    Space,
   },
-  emits: ["error"],
+  emits: ["error", "success"],
   setup(_, { emit }) {
     const store = useStore();
-    const router = useRouter();
 
     const email = ref(String(store.getters[AUTH_GETTER_EMAIL]));
     const firstName = ref("");
@@ -88,7 +96,7 @@ export default {
           },
         })
         .then(() => {
-          router.push("/auth/signup/sent");
+          emit("success");
         })
         .catch((err) => {
           const code = err?.response?.data?.code ?? 0;

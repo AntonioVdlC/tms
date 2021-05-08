@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="bg-white bg-opacity-75 backdrop-blur-md border-transparent border-2 rounded-lg p-4 grid grid-cols-1 gap-1 shadow-md"
-  >
+  <div>
     <Input
       ref="inputEmail"
       v-model:value="email"
@@ -11,14 +9,27 @@
       required
     />
 
-    <Button class="mt-2" type="primary" @click="submit">Submit</Button>
+    <Button
+      class="mt-2 group relative w-full flex justify-center"
+      type="primary"
+      @click="submit"
+    >
+      <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+        <LockClosedIcon
+          class="h-5 w-5 text-yellow-500 group-hover:text-yellow-400"
+          aria-hidden="true"
+        />
+      </span>
+      Sign in
+    </Button>
   </div>
 </template>
 
 <script>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+
+import { LockClosedIcon } from "@heroicons/vue/solid";
 
 import { AUTH_GETTER_EMAIL, AUTH_ACTION_LOGIN } from "@/store/types";
 
@@ -27,13 +38,14 @@ import Input from "@/components/Input.vue";
 
 export default {
   components: {
+    LockClosedIcon,
+
     Button,
     Input,
   },
-  emits: ["error"],
+  emits: ["error", "success"],
   setup(_, { emit }) {
     const store = useStore();
-    const router = useRouter();
 
     const email = ref(String(store.getters[AUTH_GETTER_EMAIL]));
 
@@ -55,7 +67,7 @@ export default {
           },
         })
         .then(() => {
-          router.push("/auth/login/sent");
+          emit("success", { email: email.value });
         })
         .catch((err) => {
           emit("error", err?.response?.data?.code ?? 0);
