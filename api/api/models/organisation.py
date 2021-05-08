@@ -149,11 +149,27 @@ def edit_member(org_id: str, member_id: str, member_type: MemberType) -> UpdateR
     return result
 
 
+def soft_delete_member(org_id: str, member_id: str, session) -> UpdateResult:
+    updated_at = datetime.utcnow()
+    result: UpdateResult = get_db().organisations.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({'_id': ObjectId(org_id), 'members.id': member_id},
+                    {'$set': {'members.$.is_deleted': True,
+                              'members.$.updated_at': updated_at,
+                              'updated_at': updated_at}},
+                    session=session,
+                    upsert=False)
+    return result
+
+
 def get_member(org_id: str, member_id: str) -> Member:
-    member_dict = get_db().organisations.find_one({"_id": ObjectId(org_id),
-                                                   "members": {"$elemMatch": {"id": member_id}}},
-                                                  {"members.$": 1})['members'][0]
-    return Member.from_dict(member_dict)
+    members = get_db().organisations.find_one({"_id": ObjectId(org_id),
+                                               "members": {"$elemMatch": {"id": member_id}}},
+                                              {"members.$": 1})['members']
+    if len(members) == 0:
+        return None
+    else:
+        member_dict = members[0]
+        return Member.from_dict(member_dict)
 
 
 def soft_delete_organisation(org_id: str) -> UpdateResult:

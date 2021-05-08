@@ -88,6 +88,14 @@ def add_organisations_to_user(user_id: str, org_ids: list, session):
                     session=session)
 
 
+def remove_organisation_from_user(user_id: str, org_id: str, session):
+    get_db().users.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({'_id': ObjectId(user_id)},
+                    {'$pull': {'organisations': org_id}},
+                    session=session,
+                    upsert=False)
+
+
 def update_user_details(user_id: str, first_name: str, last_name: str) -> UpdateResult:
     result: UpdateResult = get_db().users.with_options(write_concern=WriteConcern(w="majority"))\
         .update_one({'_id': ObjectId(user_id)},

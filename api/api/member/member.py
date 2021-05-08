@@ -147,3 +147,28 @@ def edit_invite(org_id: str, invite_id: str):
         return jsonify({"error": "Not enough permissions to perform action", "code": 40120}), 401
     except UnknownSystemException as e:
         return jsonify({"error": "Unknown system exception", "code": 50016}), 500
+
+
+@blueprint.route('/<string:member_id>', methods=['DELETE'])
+def delete_member(org_id: str, member_id: str):
+    try:
+        response = manager.delete_member(org_id, g.user_id, member_id)
+        return jsonify(response)
+    except UserNotFoundException as ex:
+        current_app.logger.error(f'User not found for id: {ex.user_id}')
+        return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40459}), 404
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40460}), 404
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40461}), 404
+    except UnknownMemberException as ex:
+        current_app.logger.warn(f"unknown member id: {ex.member_id}")
+        return jsonify({"error": f"Unknown member id: {ex.member_id}", "code": 40021}), 400
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "Not enough permissions to perform action", "code": 40121}), 401
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exception", "code": 50017}), 500
+

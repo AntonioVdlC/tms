@@ -125,10 +125,44 @@ def edit_member(org_id: str, user_id: str, member_id: str, request: EditMemberRe
                 raise common.UnknownSystemException(user_id)
             organisation_commons.clear_org_cache(org_id)
             member = organisation_db.get_member(org_id, member_id)
-            member_details = user_commons.get_user(member.user_id)
-            return MemberModel(id=member.member_id, first_name=member_details.first_name,
-                               last_name=member_details.last_name, member_type=member.member_type,
-                               added_at=member.added_at, updated_at=member.updated_at, is_deleted=member.is_deleted)
+            if member is None:
+                raise common.UnknownSystemException(user_id)
+            else:
+                member_details = user_commons.get_user(member.user_id)
+                return MemberModel(id=member.member_id, first_name=member_details.first_name,
+                                   last_name=member_details.last_name, member_type=member.member_type,
+                                   added_at=member.added_at, updated_at=member.updated_at, is_deleted=member.is_deleted)
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError, ConnectionError) as e:
+        get_logger().exception("error ", extra={'stack': True})
+        raise common.UnknownSystemException(user_id)
+
+
+def delete_member(org_id: str, user_id: str, member_id: str):
+    try:
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        member = organisation_db.get_member(org_id, member_id)
+        if member is None:
+            raise UnknownMemberException(member_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
+            if member.member_type == organisation_db.MemberType.owner and not \
+                    organisation_commons.check_if_owner(organisation, user_id):
+                raise InsufficientOwnerAccessException(user_id)
+            get_logger().info(f'removing member from org for user id: {member.user_id}')
+            with get_client().start_session() as session:
+                with session.start_transaction():
+                    user_db.remove_organisation_from_user(member.user_id, org_id, session)
+                    organisation_db.soft_delete_member(org_id, member.member_id, session)
+            user_commons.clear_user_cache(member_id)
+            organisation_commons.clear_org_cache(org_id)
+            return {"message": "member deleted from organisation"}
         else:
             raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
     except (PyMongoError, RedisError, ConnectionError) as e:
