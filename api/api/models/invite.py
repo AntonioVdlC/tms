@@ -80,6 +80,45 @@ def get_invites_by_email(email: str) -> list:
     return invites
 
 
+def get_invites_by_org(org_id: str) -> list:
+    invites = []
+    for invite_dict in get_db().invites.find({"org_id": org_id}):
+        invites.append(Invite.from_dict(invite_dict))
+    return invites
+
+
+def edit_invite(invite_id: str, email: str, member_type: MemberType) -> UpdateResult:
+    updated_at = datetime.utcnow()
+    result: UpdateResult = get_db().invites.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({"_id": ObjectId(invite_id)},
+                    {"$set": {"email": email,
+                              "member_type": member_type.value,
+                              "updated_at": updated_at}},
+                    upsert=False)
+    return result
+
+
+def edit_invite_and_soft_delete(invite_id: str, email: str, member_type: MemberType, session) -> UpdateResult:
+    updated_at = datetime.utcnow()
+    result: UpdateResult = get_db().invites.with_options(write_concern=WriteConcern(w="majority")) \
+        .update_one({"_id": ObjectId(invite_id)},
+                    {"$set": {"email": email,
+                              "member_type": member_type.value,
+                              "is_deleted": True,
+                              "updated_at": updated_at}},
+                    session=session,
+                    upsert=False)
+    return result
+
+
+def get_invite(invite_id: str) -> Invite:
+    invite_dict = get_db().invites.find_one({"_id": ObjectId(invite_id)})
+    if invite_dict is None:
+        return None
+    else:
+        return Invite.from_dict(invite_dict)
+
+
 def soft_delete_invite(invite_id: ObjectId, session) -> UpdateResult:
     updated_at = datetime.utcnow()
     result: UpdateResult = get_db().invites.with_options(write_concern=WriteConcern(w="majority"))\

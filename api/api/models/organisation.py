@@ -16,26 +16,36 @@ class MemberType(str, Enum):
 
 
 class Member(object):
-    def __init__(self, user_id: str, member_type: MemberType, added_at: datetime):
+    def __init__(self, member_id: str, user_id: str, member_type: MemberType, added_at: datetime, updated_at: datetime,
+                 is_deleted: bool = False):
+        self.member_id = member_id
         self.user_id = user_id
         self.member_type = member_type
         self.added_at = added_at
+        self.updated_at = updated_at
+        self.is_deleted = is_deleted
 
     def as_dict(self, to_cache=False):
         if to_cache:
-            return {"user_id": self.user_id, "member_type": self.member_type.value,
-                    "added_at": self.added_at.strftime('%Y-%m-%d %H:%M:%S.%f')}
+            return {"id": self.member_id, "user_id": self.user_id, "member_type": self.member_type.value,
+                    "added_at": self.added_at.strftime('%Y-%m-%d %H:%M:%S.%f'),
+                    "updated_at": self.updated_at.strftime('%Y-%m-%d %H:%M:%S.%f'), "is_deleted": self.is_deleted}
         else:
-            return {"user_id": self.user_id, "member_type": self.member_type.value, "added_at": self.added_at}
+            return {"id": self.member_id, "user_id": self.user_id, "member_type": self.member_type.value,
+                    "added_at": self.added_at, "updated_at": self.updated_at, "is_deleted": self.is_deleted}
 
     @staticmethod
     def from_dict(member_dict, from_cache=False):
         if from_cache:
-            return Member(user_id=member_dict['user_id'], member_type=MemberType[member_dict['member_type']],
-                          added_at=datetime.strptime(member_dict['added_at'], '%Y-%m-%d %H:%M:%S.%f'))
+            return Member(member_id=member_dict['id'], user_id=member_dict['user_id'],
+                          member_type=MemberType[member_dict['member_type']],
+                          added_at=datetime.strptime(member_dict['added_at'], '%Y-%m-%d %H:%M:%S.%f'),
+                          updated_at=datetime.strptime(member_dict['updated_at'], '%Y-%m-%d %H:%M:%S.%f'),
+                          is_deleted=member_dict['is_deleted'])
         else:
-            return Member(user_id=member_dict['user_id'], member_type=MemberType[member_dict['member_type']],
-                          added_at=member_dict['added_at'])
+            return Member(member_id=member_dict['id'], user_id=member_dict['user_id'],
+                          member_type=MemberType[member_dict['member_type']], added_at=member_dict['added_at'],
+                          updated_at=member_dict['updated_at'], is_deleted=member_dict['is_deleted'])
 
 
 class Organisation(object):
@@ -82,7 +92,8 @@ class Organisation(object):
 
 def insert_organisation(name: str, creator_id: str, object_id: ObjectId, session):
     created_at = updated_at = added_at = datetime.utcnow()
-    members = [Member(creator_id, MemberType.owner, added_at)]
+    member_id = str(ObjectId())
+    members = [Member(member_id, creator_id, MemberType.owner, added_at, updated_at)]
     organisation = Organisation(name, members, creator_id, created_at, updated_at, False, object_id)
     result: InsertOneResult = get_db().organisations.insert_one(organisation.as_dict(), session=session)
     return organisation
@@ -113,9 +124,11 @@ def update_organisation(org_id: str, name: str) -> UpdateResult:
     return result
 
 
-def add_member_to_organisation(org_id: str, member_id: str, member_type: MemberType, session):
+def add_member_to_organisation(org_id: str, user_id: str, member_type: MemberType, session):
     updated_at = added_at = datetime.utcnow()
-    member = Member(user_id=member_id, member_type=member_type, added_at=added_at)
+    member_id = str(ObjectId())
+    member = Member(member_id=member_id, user_id=user_id, member_type=member_type,
+                    added_at=added_at, updated_at=updated_at)
     result: UpdateResult = get_db().organisations.with_options(write_concern=WriteConcern(w="majority"))\
         .update_one({'_id': ObjectId(org_id)},
                     {'$addToSet': {'members': member.as_dict()},
@@ -123,6 +136,24 @@ def add_member_to_organisation(org_id: str, member_id: str, member_type: MemberT
                     upsert=False,
                     session=session)
     return result
+
+
+def edit_member(org_id: str, member_id: str, member_type: MemberType) -> UpdateResult:
+    updated_at = datetime.utcnow()
+    result: UpdateResult = get_db().organisations.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({'_id': ObjectId(org_id), 'members.id': member_id},
+                    {'$set': {'members.$.member_type': member_type.value,
+                              'members.$.updated_at': updated_at,
+                              'updated_at': updated_at}},
+                    upsert=False)
+    return result
+
+
+def get_member(org_id: str, member_id: str) -> Member:
+    member_dict = get_db().organisations.find_one({"_id": ObjectId(org_id),
+                                                   "members": {"$elemMatch": {"id": member_id}}},
+                                                  {"members.$": 1})['members'][0]
+    return Member.from_dict(member_dict)
 
 
 def soft_delete_organisation(org_id: str) -> UpdateResult:

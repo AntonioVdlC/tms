@@ -65,6 +65,14 @@ def get_user_by_id(object_id: str) -> User:
         return User.from_dict(user_dict)
 
 
+def get_users(object_ids: list) -> list:
+    ids = list(map(lambda object_id: ObjectId(object_id), object_ids))
+    users = []
+    for user_dict in get_db().users.find({"_id": {"$in": ids}}):
+        users.append(User.from_dict(user_dict))
+    return users
+
+
 def insert_user(email: str, first_name: str, last_name: str) -> User:
     created_at = updated_at = datetime.utcnow()
     user = User(object_id=ObjectId(), email=email, first_name=first_name,
