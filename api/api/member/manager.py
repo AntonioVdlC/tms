@@ -177,11 +177,15 @@ def edit_invite(org_id: str, user_id: str, invite_id: str, request: EditInviteRe
             raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
 
         user = user_commons.get_user(user_id)
+        invite = invite_db.get_invite(invite_id)
+        if invite is None:
+            raise UnknownInviteException(invite_id)
 
         if (str(organisation.object_id) in user.organisations) and \
                 organisation_commons.check_if_admin_and_above(organisation, user_id):
-            if request.member_type == organisation_db.MemberType.owner and not \
-                    organisation_commons.check_if_owner(organisation, user_id):
+            if (request.member_type == organisation_db.MemberType.owner or
+                invite.member_type == organisation_db.MemberType.owner) \
+                    and not organisation_commons.check_if_owner(organisation, user_id):
                 raise InsufficientOwnerAccessException(user_id)
             member_email = str(request.email)
             existing_member: user_db.User = user_db.get_user_by_email(member_email)
@@ -209,6 +213,128 @@ def edit_invite(org_id: str, user_id: str, invite_id: str, request: EditInviteRe
                                                                        session)
                             invite_db.edit_invite_and_soft_delete(invite_id, str(request.email),
                                                                   request.member_type, session)
+                    organisation_commons.clear_org_cache(org_id)
+                    soft_deleted = True
+            new_invite = invite_db.get_invite(invite_id)
+            if new_invite is None:
+                raise common.UnknownSystemException(user_id)
+            else:
+                invite_model = InviteModel(id=str(new_invite.object_id), email=new_invite.email,
+                                           member_type=new_invite.member_type, created_at=new_invite.created_at,
+                                           updated_at=new_invite.updated_at, is_deleted=new_invite.is_deleted)
+                return EditInviteResponse(soft_deleted=soft_deleted, invite=invite_model)
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError, ConnectionError) as e:
+        get_logger().exception("error ", extra={'stack': True})
+        raise common.UnknownSystemException(user_id)
+
+
+def delete_invite(org_id: str, user_id: str, invite_id: str):
+    try:
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        invite = invite_db.get_invite(invite_id)
+        if invite is None:
+            raise UnknownInviteException(invite_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
+            if invite.member_type == organisation_db.MemberType.owner and not \
+                    organisation_commons.check_if_owner(organisation, user_id):
+                raise InsufficientOwnerAccessException(user_id)
+            with get_client().start_session() as session:
+                with session.start_transaction():
+                    invite_db.soft_delete_invite(ObjectId(invite_id), session)
+            return {"message": "Invite deleted"}
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError, ConnectionError) as e:
+        get_logger().exception("error ", extra={'stack': True})
+        raise common.UnknownSystemException(user_id)
+
+
+def enable_member(org_id: str, user_id: str, member_id: str) -> MemberModel:
+    try:
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        member = organisation_db.get_member(org_id, member_id)
+        if member is None:
+            raise UnknownMemberException(member_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
+            if member.member_type == organisation_db.MemberType.owner and not \
+                    organisation_commons.check_if_owner(organisation, user_id):
+                raise InsufficientOwnerAccessException(user_id)
+            get_logger().info(f'enabling member fpr org for user id: {member.user_id}')
+            with get_client().start_session() as session:
+                with session.start_transaction():
+                    user_db.add_organisations_to_user(member.user_id, [org_id], session)
+                    organisation_db.enable_deleted_member(org_id, member.member_id, session)
+            user_commons.clear_user_cache(member_id)
+            organisation_commons.clear_org_cache(org_id)
+
+            member = organisation_db.get_member(org_id, member_id)
+            if member is None:
+                raise common.UnknownSystemException(user_id)
+            else:
+                member_details = user_commons.get_user(member.user_id)
+                return MemberModel(id=member.member_id, first_name=member_details.first_name,
+                                   last_name=member_details.last_name, member_type=member.member_type,
+                                   added_at=member.added_at, updated_at=member.updated_at, is_deleted=member.is_deleted)
+        else:
+            raise organisation_commons.OrganisationIllegalAccessException(org_id, user_id)
+    except (PyMongoError, RedisError, ConnectionError) as e:
+        get_logger().exception("error ", extra={'stack': True})
+        raise common.UnknownSystemException(user_id)
+
+
+def enable_invite(org_id: str, user_id: str, invite_id: str) -> EditInviteResponse:
+    try:
+        organisation = organisation_commons.get_organisation_by_id(org_id)
+        if organisation.is_deleted:
+            raise organisation_commons.DeletedOrganisationAccessException(user_id=user_id, org_id=org_id)
+
+        user = user_commons.get_user(user_id)
+        invite = invite_db.get_invite(invite_id)
+        if invite is None:
+            raise UnknownInviteException(invite_id)
+
+        if (str(organisation.object_id) in user.organisations) and \
+                organisation_commons.check_if_admin_and_above(organisation, user_id):
+            if (invite.member_type == organisation_db.MemberType.owner) \
+                    and not organisation_commons.check_if_owner(organisation, user_id):
+                raise InsufficientOwnerAccessException(user_id)
+            existing_member = user_db.get_user_by_email(invite.email)
+            soft_deleted = False
+            if existing_member is None:
+                get_logger().info('No existing member, proceeding to update invite')
+                update_result = invite_db.enable_deleted_invite(invite_id)
+                if update_result.modified_count != 1:
+                    raise common.UnknownSystemException(user_id)
+            else:
+                get_logger().info('Member present.. proceeding to add to organisation')
+                member_ids = list(map(lambda member: member.user_id, organisation.members))
+                if str(existing_member.object_id) in member_ids:
+                    get_logger().warn('User already in members list..')
+                    raise DuplicateAddMemberException(existing_member.email,
+                                                      existing_member.first_name,
+                                                      existing_member.last_name)
+                else:
+                    with get_client().start_session() as session:
+                        with session.start_transaction():
+                            user_db.add_organisations_to_user(str(existing_member.object_id), [org_id], session)
+                            organisation_db.add_member_to_organisation(org_id,
+                                                                       str(existing_member.object_id),
+                                                                       invite.member_type,
+                                                                       session)
                     organisation_commons.clear_org_cache(org_id)
                     soft_deleted = True
             new_invite = invite_db.get_invite(invite_id)

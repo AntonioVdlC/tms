@@ -161,6 +161,18 @@ def soft_delete_member(org_id: str, member_id: str, session) -> UpdateResult:
     return result
 
 
+def enable_deleted_member(org_id: str, member_id: str, session) -> UpdateResult:
+    updated_at = datetime.utcnow()
+    result: UpdateResult = get_db().organisations.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({'_id': ObjectId(org_id), 'members.id': member_id},
+                    {'$set': {'members.$.is_deleted': False,
+                              'members.$.updated_at': updated_at,
+                              'updated_at': updated_at}},
+                    session=session,
+                    upsert=False)
+    return result
+
+
 def get_member(org_id: str, member_id: str) -> Member:
     members = get_db().organisations.find_one({"_id": ObjectId(org_id),
                                                "members": {"$elemMatch": {"id": member_id}}},

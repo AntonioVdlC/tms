@@ -13,3 +13,8 @@ class InsufficientOwnerAccessException(Exception):
 class UnknownMemberException(Exception):
     def __init__(self, member_id):
         self.member_id = member_id
+
+
+class UnknownInviteException(Exception):
+    def __init__(self, invite_id):
+        self.invite_id = invite_id

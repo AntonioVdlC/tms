@@ -127,3 +127,14 @@ def soft_delete_invite(invite_id: ObjectId, session) -> UpdateResult:
                               "updated_at": updated_at}},
                     session=session)
     return result
+
+
+def enable_deleted_invite(invite_id: str) -> UpdateResult:
+    updated_at = datetime.utcnow()
+    result: UpdateResult = get_db().invites.with_options(write_concern=WriteConcern(w="majority"))\
+        .update_one({"_id": ObjectId(invite_id)},
+                    {"$set": {"is_deleted": False,
+                              "updated_at": updated_at}},
+                    upsert=False)
+    return result
+

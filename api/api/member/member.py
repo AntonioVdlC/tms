@@ -139,6 +139,8 @@ def edit_invite(org_id: str, invite_id: str):
     except DeletedOrganisationAccessException as ex:
         current_app.logger.warn(f"Access to deleted organisation: {org_id}")
         return jsonify({"error": "Accessing deleted organisations", "code": 40458}), 404
+    except UnknownInviteException as ex:
+        return jsonify({"error": f"Unknown invite: {ex.invite_id}", "code": 40459}), 404
     except InsufficientOwnerAccessException as ex:
         current_app.logger.warn(f'Trying to add owner with insufficient permission: {ex.user_id}')
         return jsonify({"error": "Only an owner can add another owner", "code": 40119}), 401
@@ -156,13 +158,13 @@ def delete_member(org_id: str, member_id: str):
         return jsonify(response)
     except UserNotFoundException as ex:
         current_app.logger.error(f'User not found for id: {ex.user_id}')
-        return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40459}), 404
+        return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40460}), 404
     except OrganisationNotFoundException as ex:
         current_app.logger.warn(f"Unknown organisation: {org_id}")
-        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40460}), 404
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40461}), 404
     except DeletedOrganisationAccessException as ex:
         current_app.logger.warn(f"Access to deleted organisation: {org_id}")
-        return jsonify({"error": "Accessing deleted organisations", "code": 40461}), 404
+        return jsonify({"error": "Accessing deleted organisations", "code": 40462}), 404
     except UnknownMemberException as ex:
         current_app.logger.warn(f"unknown member id: {ex.member_id}")
         return jsonify({"error": f"Unknown member id: {ex.member_id}", "code": 40021}), 400
@@ -172,3 +174,82 @@ def delete_member(org_id: str, member_id: str):
     except UnknownSystemException as e:
         return jsonify({"error": "Unknown system exception", "code": 50017}), 500
 
+
+@blueprint.route('/invites/<string:invite_id>', methods=['DELETE'])
+def delete_invite(org_id: str, invite_id: str):
+    try:
+        response = manager.delete_invite(org_id, g.user_id, invite_id)
+        return jsonify(response)
+    except UserNotFoundException as ex:
+        current_app.logger.error(f'User not found for id: {ex.user_id}')
+        return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40463}), 404
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40464}), 404
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40465}), 404
+    except UnknownInviteException as ex:
+        return jsonify({"error": f"Unknown invite: {ex.invite_id}", "code": 40466}), 404
+    except InsufficientOwnerAccessException as ex:
+        current_app.logger.warn(f'Trying to add owner with insufficient permission: {ex.user_id}')
+        return jsonify({"error": "Only an owner can add another owner", "code": 40122}), 401
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "Not enough permissions to perform action", "code": 40123}), 401
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exception", "code": 50018}), 500
+
+
+@blueprint.route('/<string:member_id>/enable', methods=['PUT'])
+def enable_member(org_id: str, member_id: str):
+    try:
+        response = manager.enable_member(org_id, g.user_id, member_id)
+        return jsonify(response.dict())
+    except UserNotFoundException as ex:
+        current_app.logger.error(f'User not found for id: {ex.user_id}')
+        return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40467}), 404
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40468}), 404
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40469}), 404
+    except UnknownMemberException as ex:
+        current_app.logger.warn(f"unknown member id: {ex.member_id}")
+        return jsonify({"error": f"Unknown member id: {ex.member_id}", "code": 40022}), 400
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "Not enough permissions to perform action", "code": 40124}), 401
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exception", "code": 50019}), 500
+
+
+@blueprint.route('/invites/<string:invite_id>/enable', methods=['PUT'])
+def enable_invite(org_id: str, invite_id: str):
+    try:
+        response = manager.enable_invite(org_id, g.user_id, invite_id)
+        return jsonify(response.dict())
+    except DuplicateAddMemberException as ex:
+        current_app.logger.error(f'Already member in list for email: {ex.email}. Please delete invite if not needed')
+        return jsonify({"error": f'Already member in list for email: {ex.email}. Please delete invite if not needed',
+                        "code": 40023}), 400
+    except UserNotFoundException as ex:
+        current_app.logger.error(f'User not found for id: {ex.user_id}')
+        return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40470}), 404
+    except OrganisationNotFoundException as ex:
+        current_app.logger.warn(f"Unknown organisation: {org_id}")
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40471}), 404
+    except DeletedOrganisationAccessException as ex:
+        current_app.logger.warn(f"Access to deleted organisation: {org_id}")
+        return jsonify({"error": "Accessing deleted organisations", "code": 40472}), 404
+    except UnknownInviteException as ex:
+        return jsonify({"error": f"Unknown invite: {ex.invite_id}", "code": 40473}), 404
+    except InsufficientOwnerAccessException as ex:
+        current_app.logger.warn(f'Trying to add owner with insufficient permission: {ex.user_id}')
+        return jsonify({"error": "Only an owner can add another owner", "code": 40125}), 401
+    except OrganisationIllegalAccessException as ex:
+        current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
+        return jsonify({"error": "Not enough permissions to perform action", "code": 40126}), 401
+    except UnknownSystemException as e:
+        return jsonify({"error": "Unknown system exception", "code": 50020}), 500
