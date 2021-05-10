@@ -1,9 +1,9 @@
 <template>
   <div class="overflow-hidden flex">
     <Menu :items="menu" />
-    <Main>
+    <main class="flex-grow overflow-auto p-4">
       <router-view></router-view>
-    </Main>
+    </main>
   </div>
 </template>
 
@@ -12,12 +12,10 @@ import { useStore } from "vuex";
 
 import { USER_ACTION_GET_CURRENT } from "@/store/types";
 
-import Main from "@/components/Main.vue";
 import Menu from "@/components/Menu.vue";
 
 export default {
   components: {
-    Main,
     Menu,
   },
   setup() {

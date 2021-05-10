@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img class="mx-auto h-12 w-auto" src="@/assets/logo_icon.png" alt="TMS" />
+    <Logo class="mx-auto h-12 w-auto" type="icon-only" alt="TMS" />
     <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
       A magic link has been sent to
       <span class="font-medium text-yellow-600">{{ email }}</span>
@@ -24,7 +24,12 @@ import { useStore } from "vuex";
 
 import { AUTH_GETTER_EMAIL } from "@/store/types";
 
+import Logo from "@/components/Logo.vue";
+
 export default {
+  components: {
+    Logo,
+  },
   setup() {
     const store = useStore();
 

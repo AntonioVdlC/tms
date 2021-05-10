@@ -11,7 +11,7 @@
         <div class="flex justify-start lg:w-0 lg:flex-1">
           <a href="#">
             <span class="sr-only">TMS</span>
-            <img class="h-8 w-auto sm:h-10" src="@/assets/logo.png" alt="" />
+            <Logo class="h-8 w-auto sm:h-10" type="icon-text" />
           </a>
         </div>
         <div class="-mr-2 -my-2 md:hidden">
@@ -69,11 +69,7 @@
           <div class="pt-5 pb-6 px-5">
             <div class="flex items-center justify-between">
               <div>
-                <img
-                  class="h-8 w-auto"
-                  src="@/assets/logo.png"
-                  alt="Workflow"
-                />
+                <Logo class="h-8 w-auto" type="icon-text" alt="TMS" />
               </div>
               <div class="-mr-2">
                 <PopoverButton
@@ -137,6 +133,8 @@ import {
   XIcon,
 } from "@heroicons/vue/outline";
 
+import Logo from "@/components/Logo.vue";
+
 const menu = [
   {
     name: "Docs",
@@ -157,6 +155,8 @@ export default {
     PopoverPanel,
     MenuIcon,
     XIcon,
+
+    Logo,
   },
   setup() {
     return {

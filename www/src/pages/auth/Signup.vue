@@ -1,6 +1,6 @@
 <template>
   <div>
-    <img class="mx-auto h-12 w-auto" src="@/assets/logo_icon.png" alt="TMS" />
+    <Logo class="mx-auto h-12 w-auto" type="icon-only" alt="TMS" />
     <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
       Create an account
     </h2>
@@ -36,12 +36,14 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 import Error from "@/components/Error.vue";
+import Logo from "@/components/Logo.vue";
 
-import SignupForm from "@/containers/SignupForm.vue";
+import SignupForm from "@/components/auth/SignupForm.vue";
 
 export default {
   components: {
     Error,
+    Logo,
 
     SignupForm,
   },

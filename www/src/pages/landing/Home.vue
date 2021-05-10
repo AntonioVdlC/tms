@@ -9,10 +9,10 @@
 </template>
 
 <script>
-import HomeCTA from "@/containers/landing/HomeCTA.vue";
-import HomeFeatures from "@/containers/landing/HomeFeatures.vue";
-import HomeHero from "@/containers/landing/HomeHero.vue";
-import HomePricing from "@/containers/landing/HomePricing.vue";
+import HomeCTA from "@/components/landing/HomeCTA.vue";
+import HomeFeatures from "@/components/landing/HomeFeatures.vue";
+import HomeHero from "@/components/landing/HomeHero.vue";
+import HomePricing from "@/components/landing/HomePricing.vue";
 
 import Space from "@/components/Space.vue";
 
