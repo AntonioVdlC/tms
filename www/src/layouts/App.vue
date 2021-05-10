@@ -12,7 +12,7 @@ import { useStore } from "vuex";
 
 import { USER_ACTION_GET_CURRENT } from "@/store/types";
 
-import Menu from "@/components/Menu.vue";
+import Menu from "@/components/app/Menu.vue";
 
 export default {
   components: {

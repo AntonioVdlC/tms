@@ -9,10 +9,10 @@
         class="flex justify-between items-center border-b-2 border-gray-100 py-6 md:justify-start md:space-x-10"
       >
         <div class="flex justify-start lg:w-0 lg:flex-1">
-          <a href="#">
+          <Link href="/">
             <span class="sr-only">TMS</span>
             <Logo class="h-8 w-auto sm:h-10" type="icon-text" />
-          </a>
+          </Link>
         </div>
         <div class="-mr-2 -my-2 md:hidden">
           <PopoverButton
@@ -25,26 +25,28 @@
 
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center justify-end md:flex-1 lg:w-0">
-          <a
+          <Link
             v-for="item in menu"
             :key="item.name"
             :href="item.href"
-            class="text-base font-medium text-gray-500 hover:text-gray-900 ml-8"
+            class="text-base font-medium ml-8"
+            type="secondary"
           >
             {{ item.name }}
-          </a>
-          <a
+          </Link>
+          <Link
             href="/auth/login"
-            class="whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900 ml-8"
+            class="whitespace-nowrap text-base font-medium ml-8"
           >
             Sign in
-          </a>
-          <a
+          </Link>
+          <Button
             href="/auth/signup"
-            class="ml-8 whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-yellow-600 hover:bg-yellow-700"
+            class="ml-8 whitespace-nowrap inline-flex items-center justify-center"
+            type="primary"
           >
             Sign up
-          </a>
+          </Button>
         </div>
         <!--/Desktop Menu -->
       </div>
@@ -82,11 +84,12 @@
             </div>
             <div class="mt-6">
               <nav class="grid gap-y-8">
-                <a
+                <Link
                   v-for="item in menu"
                   :key="item.name"
                   :href="item.href"
                   class="-m-3 p-3 flex items-center rounded-md hover:bg-gray-50"
+                  type="secondary"
                 >
                   <component
                     :is="item.icon"
@@ -96,24 +99,25 @@
                   <span class="ml-3 text-base font-medium text-gray-900">
                     {{ item.name }}
                   </span>
-                </a>
+                </Link>
               </nav>
             </div>
           </div>
           <div class="py-6 px-5 space-y-6">
             <div>
-              <a
-                href="#"
-                class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-yellow-600 hover:bg-yellow-700"
+              <Button
+                href="/auth/signup"
+                class="w-full flex items-center justify-center"
+                type="primary"
               >
                 Sign up
-              </a>
+              </Button>
               <p class="mt-6 text-center text-base font-medium text-gray-500">
                 Existing customer?
                 {{ " " }}
-                <a href="#" class="text-yellow-600 hover:text-yellow-500">
-                  Sign in
-                </a>
+                <Link href="/auth/login" type="primary">Click here</Link>
+                {{ " " }}
+                to sign in.
               </p>
             </div>
           </div>
@@ -133,6 +137,8 @@ import {
   XIcon,
 } from "@heroicons/vue/outline";
 
+import Button from "@/components/Button.vue";
+import Link from "@/components/Link.vue";
 import Logo from "@/components/Logo.vue";
 
 const menu = [
@@ -156,6 +162,8 @@ export default {
     MenuIcon,
     XIcon,
 
+    Button,
+    Link,
     Logo,
   },
   setup() {

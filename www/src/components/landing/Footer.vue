@@ -11,8 +11,8 @@
       <div class="mb-6 md:mb-0">
         <h3 class="text-lg font-semibold">Company</h3>
         <ul>
-          <li class="cursor-pointer hover:underline">
-            <a href="/about">About Us</a>
+          <li>
+            <Link href="/about" type="secondary">About Us</Link>
           </li>
         </ul>
       </div>
@@ -20,14 +20,16 @@
       <div class="mb-6 md:mb-0">
         <h3 class="text-lg font-semibold">Resources</h3>
         <ul>
-          <li class="cursor-pointer hover:underline">
-            <a href="/docs">Docs</a>
+          <li>
+            <Link href="/docs" type="secondary">Docs</Link>
           </li>
-          <li class="cursor-pointer hover:underline">
-            <a href="https://github.com/AntonioVdlC/tms">Contribute</a>
+          <li>
+            <Link href="https://github.com/AntonioVdlC/tms" type="secondary">
+              Contribute
+            </Link>
           </li>
-          <li class="cursor-pointer hover:underline">
-            <a href="#">License</a>
+          <li>
+            <Link href="#" type="secondary">License</Link>
           </li>
         </ul>
       </div>
@@ -35,28 +37,20 @@
       <div class="mb-6 md:mb-0">
         <h3 class="text-lg font-semibold">Language</h3>
         <ul>
-          <li
-            v-for="language in languages"
-            :key="language.code"
-            class="cursor-pointer hover:underline focus:underline focus:outline-none active:no-underline"
-            :class="[
-              lang === language.code ? 'font-medium hover:no-underline' : '',
-            ]"
-            tabindex="0"
-            @click="
-              (e) => {
-                e.target.blur();
-                setLang(language.code);
-              }
-            "
-            @keyup.enter="
-              (e) => {
-                e.target.blur();
-                setLang(language.code);
-              }
-            "
-          >
-            {{ language.name }}
+          <li v-for="language in languages" :key="language.code">
+            <Link
+              href="#"
+              :class="{ 'font-medium': lang === language.code }"
+              @click.prevent="
+                (e) => {
+                  e.target.blur();
+                  setLang(language.code);
+                  scrollToTop();
+                }
+              "
+            >
+              {{ language.name }}
+            </Link>
           </li>
         </ul>
       </div>
@@ -72,6 +66,8 @@
 <script>
 import { ref } from "vue";
 
+import Link from "@/components/Link.vue";
+
 const languages = [
   { code: "en", name: "English" },
   { code: "es", name: "Español" },
@@ -79,6 +75,9 @@ const languages = [
 ];
 
 export default {
+  components: {
+    Link,
+  },
   setup() {
     const lang = ref("en");
     const setLang = (value) => {
@@ -86,11 +85,17 @@ export default {
       lang.value = value;
     };
 
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     return {
       languages,
 
       lang,
       setLang,
+
+      scrollToTop,
     };
   },
 };

@@ -7,12 +7,9 @@
     <p class="mt-2 text-center text-sm text-gray-600">
       Or
       {{ " " }}
-      <a
-        href="/auth/signup"
-        class="font-medium text-yellow-600 hover:text-yellow-500"
-      >
+      <Link href="/auth/signup" class="font-medium" type="primary">
         create an account
-      </a>
+      </Link>
     </p>
   </div>
 
@@ -28,12 +25,14 @@
 <script>
 import { useRouter } from "vue-router";
 
+import Link from "@/components/Link.vue";
 import Logo from "@/components/Logo.vue";
 
 import LoginForm from "@/components/auth/LoginForm.vue";
 
 export default {
   components: {
+    Link,
     Logo,
 
     LoginForm,

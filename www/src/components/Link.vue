@@ -3,7 +3,11 @@
     :href="href"
     :target="blank ? '_blank' : ''"
     rel="noopener noreferrer"
-    class="cursor-pointer underline"
+    class="cursor-pointer focus:outline-none focus:underline"
+    :class="{
+      'text-yellow-600 hover:text-yellow-500': type === 'primary',
+      'text-gray-500 hover:text-gray-900': type === 'secondary',
+    }"
   >
     <slot />
   </a>
@@ -19,6 +23,13 @@ export default {
     blank: {
       type: Boolean,
       default: false,
+    },
+    type: {
+      type: String,
+      required: true,
+      validator(value) {
+        return ["primary", "secondary"].includes(value);
+      },
     },
   },
   setup() {},

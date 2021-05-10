@@ -20,12 +20,14 @@
 
       <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
         <div class="rounded-md shadow">
-          <a
+          <Button
             href="/auth/signup"
-            class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 md:py-4 md:text-lg md:px-10"
+            class="w-full flex items-center justify-center"
+            type="primary"
+            size="lg"
           >
             Get started
-          </a>
+          </Button>
         </div>
       </div>
     </div>
@@ -35,3 +37,14 @@
     </div>
   </div>
 </template>
+
+<script>
+import Button from "@/components/Button.vue";
+
+export default {
+  components: {
+    Button,
+  },
+  setup() {},
+};
+</script>

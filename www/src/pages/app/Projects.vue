@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import Header from "@/components/Header.vue";
+import Header from "@/components/app/Header.vue";
 
-import ProjectList from "@/components/ProjectList.vue";
+import ProjectList from "@/components/app/ProjectList.vue";
 
 export default {
   components: {

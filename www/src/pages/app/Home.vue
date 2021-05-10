@@ -7,10 +7,10 @@
 </template>
 
 <script>
-import Header from "@/components/Header.vue";
+import Header from "@/components/app/Header.vue";
 
-import HomeFeed from "@/components/HomeFeed.vue";
-import HomeOverview from "@/components/HomeOverview.vue";
+import HomeFeed from "@/components/app/HomeFeed.vue";
+import HomeOverview from "@/components/app/HomeOverview.vue";
 
 export default {
   components: {

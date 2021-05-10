@@ -8,7 +8,7 @@
 <script>
 import { mapGetters } from "vuex";
 
-import Header from "@/components/Header.vue";
+import Header from "@/components/app/Header.vue";
 
 export default {
   components: {

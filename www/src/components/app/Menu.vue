@@ -2,7 +2,7 @@
   <nav
     class="flex flex-col h-screen w-40 pt-4 pb-4 bg-green-600 text-white text-left"
   >
-    <Logo />
+    <Logo type="icon-only" />
     <MenuItem
       v-for="(item, index) in items"
       :key="`menu-item-${index}`"
