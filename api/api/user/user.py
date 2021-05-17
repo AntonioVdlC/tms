@@ -94,6 +94,10 @@ def delete_user():
         return jsonify({"message": "Missing Authorization header", "code": 40015}), 400
     except IndexError as e:
         return jsonify({"message": "Illegal token format", "code": 40016}), 400
+    except SoleOwnerDeletionException as ex:
+        return jsonify({"error": "Sole owner in a few organisations. Please nominate a new owner or delete org",
+                        "code": 40024,
+                        "organisations": ex.orgs}), 400
     except UserNotFoundException as ex:
         current_app.logger.error(f'User not found for id: {ex.user_id}')
         return jsonify({"error": f'User not found for id: {ex.user_id}', "code": 40443}), 404

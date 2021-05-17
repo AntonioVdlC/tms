@@ -22,3 +22,8 @@ class UnknownEmailTypeException(Exception):
 class IllegalUpdateTokenException(Exception):
     def __init__(self, token):
         self.token = token
+
+
+class SoleOwnerDeletionException(Exception):
+    def __init__(self, orgs):
+        self.orgs = orgs

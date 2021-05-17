@@ -13,6 +13,7 @@ from api.commons import user as user_commons
 from api.commons import organisation as organisation_commons
 from api.commons import common as common
 from api.models import user as user_db
+from api.models import organisation as organisation_db
 
 
 class UserModel(BaseModel):
@@ -166,6 +167,15 @@ def delete_user(user_id: str, token: str):
     try:
         user = user_commons.get_user(user_id)
         # TODO: figure out how to delete user in all organisations and what to do when user is admin/owner for one
+        organisations = organisation_db.get_organisations(user.organisations)
+        is_sole_owner = False
+        sole_owner_orgs = []
+        for organisation in organisations:
+            if check_if_sole_owner(user_id, organisation):
+                is_sole_owner = True
+                sole_owner_orgs.append(organisation.name)
+        if is_sole_owner:
+            raise SoleOwnerDeletionException(sole_owner_orgs)
         hashed_email = str(user_commons.generate_unique_hash(user.email, hash128=True))
         hashed_last_name = str(user_commons.generate_unique_hash(user.last_name, hash128=True))
         update_result = user_db.soft_delete_user(user_id, hashed_email, hashed_last_name)
@@ -176,6 +186,18 @@ def delete_user(user_id: str, token: str):
     except (PyMongoError, RedisError, ConnectionError) as e:
         get_logger().exception('everything is wrong bro', extra={'stack': True})
         raise common.UnknownSystemException(user_id)
+
+
+def check_if_sole_owner(user_id: str, organisation: organisation_db.Organisation) -> bool:
+    is_owner = False
+    only_owner = True
+    for member in organisation.members:
+        if member.user_id == user_id and member.member_type == organisation_db.MemberType.owner:
+            is_owner = True
+        elif member.member_type == organisation_db.MemberType.owner:
+            only_owner = False
+    get_logger().info(f"flags for org: {organisation.name}, is_owner: {is_owner}, only_owner: {only_owner}")
+    return is_owner and only_owner
 
 
 def set_update_email_cache(user_id, update_user_dict):
