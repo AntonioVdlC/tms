@@ -6,6 +6,7 @@ from api.organisation.exceptions import *
 from api.commons.organisation import OrganisationNotFoundException, DeletedOrganisationAccessException,\
     OrganisationIllegalAccessException
 from api.commons.common import UnknownSystemException
+from api.commons import codes
 
 
 blueprint = Blueprint('organisation', __name__, url_prefix='/organisations')
@@ -20,9 +21,13 @@ def create_organisation():
         return jsonify(create_organisation_response.dict())
     except ValidationError as e:
         current_app.logger.error('Issue with json body')
-        return jsonify({"error": "Issue creating organisation with given name", "code": 40006}), 400
+        return jsonify({"error": "Issue creating organisation with given name", "code": codes.INVALID_JSON}), 400
     except OrganisationCreationException as e:
-        return jsonify({"error": "Issue creating organisation due to mongo reasons", "code": 50002}), 500
+        return jsonify({"error": "Issue creating organisation due to mongo reasons",
+                        "code": codes.ORGANISATION_CREATION_WRITE_EXCEPTION}), 500
+    except UnknownSystemException as e:
+        return jsonify({"error": "Issue with updating user details post organisation creation",
+                        "code": codes.UNKNOWN_REDIS_EXCEPTION}), 500
 
 
 @blueprint.route('', methods=['GET'])
@@ -32,7 +37,7 @@ def get_organisations():
         organisations_dict = list(map(lambda org: org.dict(), organisations))
         return jsonify(organisations_dict)
     except UnknownSystemException as e:
-        return jsonify({"error": "Unknown system exceptions", "code": 50003}), 500
+        return jsonify({"error": "Unknown system exceptions", "code": codes.UNKNOWN_SYSTEM_EXCEPTION}), 500
 
 
 @blueprint.route('/<string:org_id>', methods=['GET'])
@@ -42,13 +47,15 @@ def get_organisation(org_id: str):
         return jsonify(organisation.dict())
     except DeletedOrganisationAccessException as ex:
         current_app.logger.warn(f"Access to deleted organisation: {org_id}")
-        return jsonify({"error": "Accessing deleted organisations", "code": 40401}), 404
+        return jsonify({"error": "Accessing deleted organisations", "code": codes.DELETED_ORGANISATION}), 404
     except OrganisationNotFoundException as ex:
         current_app.logger.warn(f"Unknown organisation: {org_id}")
-        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40402}), 404
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": codes.UNKNOWN_ORGANISATION}), 404
     except OrganisationIllegalAccessException as ex:
         current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
-        return jsonify({"error": "No access to organisation", "code": 40101}), 401
+        return jsonify({"error": "No access to organisation", "code": codes.ILLEGAL_ORGANISATION_ACCESS}), 401
+    except UnknownSystemException as ex:
+        return jsonify({"error": "Unknown system exception", "code": codes.UNKNOWN_SYSTEM_EXCEPTION}), 500
 
 
 @blueprint.route('/<string:org_id>', methods=['PUT'])
@@ -59,15 +66,15 @@ def edit_organisation(org_id: str):
         return jsonify(edit_organisation_response.dict())
     except OrganisationNotFoundException as ex:
         current_app.logger.warn(f"Unknown organisation: {org_id}")
-        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40403}), 404
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": codes.UNKNOWN_ORGANISATION}), 404
     except DeletedOrganisationAccessException as ex:
         current_app.logger.warn(f"Access to deleted organisation: {org_id}")
-        return jsonify({"error": "Accessing deleted organisations", "code": 40404}), 404
+        return jsonify({"error": "Accessing deleted organisations", "code": codes.DELETED_ORGANISATION}), 404
     except OrganisationIllegalAccessException as ex:
         current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
-        return jsonify({"error": "No access to organisation", "code": 40102}), 401
+        return jsonify({"error": "No access to organisation", "code": codes.ILLEGAL_ORGANISATION_ACCESS}), 401
     except UnknownSystemException as e:
-        return jsonify({"error": "Unknown system exceptions", "code": 50004}), 500
+        return jsonify({"error": "Unknown system exceptions", "code": codes.UNKNOWN_SYSTEM_EXCEPTION}), 500
 
 
 @blueprint.route('/<string:org_id>', methods=['DELETE'])
@@ -77,12 +84,12 @@ def delete_organisation(org_id: str):
         return jsonify(delete_organisation_response)
     except OrganisationNotFoundException as ex:
         current_app.logger.warn(f"Unknown organisation: {org_id}")
-        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": 40405}), 404
+        return jsonify({"error": f"Unknown organisation by id: {org_id}", "code": codes.UNKNOWN_ORGANISATION}), 404
     except DeletedOrganisationAccessException as ex:
         current_app.logger.warn(f"Access to deleted organisation: {org_id}")
-        return jsonify({"error": "Accessing deleted organisations", "code": 40406}), 404
+        return jsonify({"error": "Accessing deleted organisations", "code": codes.DELETED_ORGANISATION}), 404
     except OrganisationIllegalAccessException as ex:
         current_app.logger.warn(f"Unauthorized access: {org_id} by {g.user_id}")
-        return jsonify({"error": "No access to organisation", "code": 40103}), 401
+        return jsonify({"error": "No access to organisation", "code": codes.ILLEGAL_ORGANISATION_ACCESS}), 401
     except UnknownSystemException as e:
-        return jsonify({"error": "Unknown system exceptions", "code": 50005}), 500
+        return jsonify({"error": "Unknown system exceptions", "code": codes.UNKNOWN_SYSTEM_EXCEPTION}), 500
