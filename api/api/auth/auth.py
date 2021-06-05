@@ -63,6 +63,8 @@ def callback():
         return response
     except ValidationError as e:
         return jsonify({"error": "Illegal json parameters", "code": codes.INVALID_JSON}), 400
+    except InvalidTokenException as e:
+        return jsonify({"error": f"Invalid token: {e.token}", "code": codes.INVALID_TOKEN}), 400
     except DuplicateSignupException as e:
         current_app.logger.warn(f'Duplicate sign up request for {e.email}')
         return jsonify({"error": f"User already exists for email {e.email}. Please try logging in",
