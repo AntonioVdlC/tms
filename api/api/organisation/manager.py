@@ -10,7 +10,7 @@ from api.utils.cache import get_cache
 from api.utils.app_wrapper import get_config, get_logger
 from api.organisation.exceptions import *
 from api.models.user import add_organisations_to_user, User, get_user_by_id
-from api.models.organisation import *
+from api.models import organisation as organisation_db
 from api.utils.db import get_client
 from api.commons import user as user_commons
 from api.commons import organisation as organisation_commons
@@ -46,7 +46,7 @@ def create_organisation(user_id: str, request: OrganisationRequest) -> Organisat
                               f'object id {str(object_id)}')
             with get_client().start_session() as session:
                 with session.start_transaction():
-                    organisation = insert_organisation(organisation_name, user_id, object_id, session)
+                    organisation = organisation_db.insert_organisation(organisation_name, user_id, object_id, session)
                     add_organisations_to_user(user_id, [str(organisation.object_id)], session)
             user_commons.clear_user_cache(user_id)
         except WriteError as we:
@@ -116,7 +116,7 @@ def edit_organisation(request: OrganisationRequest, organisation_id: str, user_i
         if (str(organisation.object_id) in user.organisations) and \
                 organisation_commons.check_if_admin_and_above(organisation, user_id):
             get_logger().info('Editing organisation..')
-            update_result = update_organisation(organisation_id, request.organisation_name)
+            update_result = organisation_db.update_organisation(organisation_id, request.organisation_name)
             if update_result.modified_count != 1:
                 raise common.UnknownSystemException(user_id)
             organisation_commons.clear_org_cache(organisation_id)
@@ -139,9 +139,9 @@ def delete_organisation(organisation_id: str, user_id: str):
         user = user_commons.get_user(user_id)
 
         if (str(organisation.object_id) in user.organisations) and \
-                organisation_commons.check_if_admin_and_above(organisation, user_id):
+                organisation_commons.check_if_owner(organisation, user_id):
             get_logger().info('Deleting organisation..')
-            delete_result = soft_delete_organisation(organisation_id)
+            delete_result = organisation_db.soft_delete_organisation(organisation_id)
             if delete_result.modified_count != 1:
                 raise common.UnknownSystemException(user_id)
             organisation_commons.clear_org_cache(organisation_id)
