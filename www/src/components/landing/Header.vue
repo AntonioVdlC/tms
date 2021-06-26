@@ -12,8 +12,7 @@
           items-center
           border-b-2 border-gray-100
           py-6
-          md:justify-start
-          md:space-x-10
+          md:justify-start md:space-x-10
         "
       >
         <div class="flex justify-start lg:w-0 lg:flex-1">
@@ -32,10 +31,11 @@
               items-center
               justify-center
               text-gray-400
-              hover:text-gray-500
-              hover:bg-gray-100
+              hover:text-gray-500 hover:bg-gray-100
               focus:outline-none
-              focus:ring-2 focus:ring-inset focus:ring-amber-500
+              focus:ring-2
+              focus:ring-inset
+              focus:ring-amber-500
             "
           >
             <span class="sr-only">Open menu</span>
@@ -125,10 +125,11 @@
                     items-center
                     justify-center
                     text-gray-400
-                    hover:text-gray-500
-                    hover:bg-gray-100
+                    hover:text-gray-500 hover:bg-gray-100
                     focus:outline-none
-                    focus:ring-2 focus:ring-inset focus:ring-amber-500
+                    focus:ring-2
+                    focus:ring-inset
+                    focus:ring-amber-500
                   "
                 >
                   <span class="sr-only">Close menu</span>

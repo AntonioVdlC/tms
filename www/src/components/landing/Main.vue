@@ -8,11 +8,9 @@
         mx-auto
         max-w-5xl
         px-4
-        sm:mt-12
-        sm:px-6
+        sm:mt-12 sm:px-6
         md:mt-16
-        lg:mt-20
-        lg:px-8
+        lg:mt-20 lg:px-8
         xl:mt-28
       "
     >
