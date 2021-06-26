@@ -1,6 +1,14 @@
 <template>
   <nav
-    class="flex flex-col h-screen w-40 pt-4 pb-4 bg-green-600 text-white text-left"
+    class="
+      flex flex-col
+      h-screen
+      w-40
+      pt-4
+      pb-4
+      bg-green-600
+      text-white text-left
+    "
   >
     <Logo type="icon-only" />
     <MenuItem

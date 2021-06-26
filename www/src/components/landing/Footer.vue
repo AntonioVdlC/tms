@@ -1,7 +1,17 @@
 <template>
   <footer class="max-w-5xl mx-auto">
     <div
-      class="flex flex-col md:flex-row py-6 px-6 md:px-4 lg:px-8 justify-between border-t-2 border-gray-100 md:text-left"
+      class="
+        flex flex-col
+        md:flex-row
+        py-6
+        px-6
+        md:px-4
+        lg:px-8
+        justify-between
+        border-t-2 border-gray-100
+        md:text-left
+      "
     >
       <div class="mb-6 md:mb-0">
         <h3 class="text-lg font-semibold">TMS</h3>

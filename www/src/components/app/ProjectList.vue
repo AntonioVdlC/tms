@@ -18,7 +18,20 @@
       @click="createNewProject()"
     >
       <span
-        class="border border-gray-600 bg-gray-300 h-40 w-60 hover:bg-gray-200 flex items-center justify-center text-white font-extrabold text-6xl hover:text-black"
+        class="
+          border border-gray-600
+          bg-gray-300
+          h-40
+          w-60
+          hover:bg-gray-200
+          flex
+          items-center
+          justify-center
+          text-white
+          font-extrabold
+          text-6xl
+          hover:text-black
+        "
       >
         +
       </span>
