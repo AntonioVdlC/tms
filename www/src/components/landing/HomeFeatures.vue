@@ -4,12 +4,20 @@
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="lg:text-center">
         <h2
-          class="text-base text-yellow-600 font-semibold tracking-wide uppercase"
+          class="text-base text-amber-600 font-semibold tracking-wide uppercase"
         >
           {{ subtitle }}
         </h2>
         <p
-          class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl"
+          class="
+            mt-2
+            text-3xl
+            leading-8
+            font-extrabold
+            tracking-tight
+            text-gray-900
+            sm:text-4xl
+          "
         >
           A better way to translate products
         </p>
@@ -22,12 +30,26 @@
 
       <div class="mt-10">
         <dl
-          class="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10"
+          class="
+            space-y-10
+            md:space-y-0
+            md:grid md:grid-cols-2
+            md:gap-x-8 md:gap-y-10
+          "
         >
           <div v-for="feature in features" :key="feature.name" class="">
             <dt class="flex items-center">
               <div
-                class="flex items-center justify-center h-12 w-12 rounded-md bg-yellow-600 text-white"
+                class="
+                  flex
+                  items-center
+                  justify-center
+                  h-12
+                  w-12
+                  rounded-md
+                  bg-amber-600
+                  text-white
+                "
               >
                 <component
                   :is="feature.icon"

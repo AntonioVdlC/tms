@@ -8,7 +8,7 @@
     Oops, an error has occured.<br />Please try
     <a
       href="#"
-      class="cursor-pointer text-yellow-600 hover:underline"
+      class="cursor-pointer text-amber-600 hover:underline"
       @click.prevent="logout"
     >
       signing out again.

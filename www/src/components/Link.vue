@@ -5,7 +5,7 @@
     rel="noopener noreferrer"
     class="cursor-pointer focus:outline-none focus:underline"
     :class="{
-      'text-yellow-600 hover:text-yellow-500': type === 'primary',
+      'text-amber-600 hover:text-amber-500': type === 'primary',
       'text-gray-500 hover:text-gray-900': type === 'secondary',
     }"
   >

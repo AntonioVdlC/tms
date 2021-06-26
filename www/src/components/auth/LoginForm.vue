@@ -16,7 +16,7 @@
     >
       <span class="absolute left-0 inset-y-0 flex items-center pl-3">
         <LockClosedIcon
-          class="h-5 w-5 text-yellow-500 group-hover:text-yellow-400"
+          class="h-5 w-5 text-amber-500 group-hover:text-amber-400"
           aria-hidden="true"
         />
       </span>

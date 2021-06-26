@@ -6,13 +6,13 @@
     </h2>
     <h2 class="mt-6 text-center text-2xl font-extrabold text-gray-900">
       A confirmation link has been sent to
-      <span class="font-medium text-yellow-600">{{ email }}</span>
+      <span class="font-medium text-amber-600">{{ email }}</span>
     </h2>
     <p class="mt-8 text-sm">
       If you haven't received an email, please click
       <a
         href="/auth/signup"
-        class="text-yellow-600 hover:underline cursor-pointer"
+        class="text-amber-600 hover:underline cursor-pointer"
       >
         here
       </a>

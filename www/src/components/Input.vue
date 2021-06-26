@@ -9,7 +9,23 @@
     </label>
     <input
       :id="id"
-      class="appearance-none relative block w-full px-3 py-2 border placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 focus:z-10 sm:text-sm"
+      class="
+        appearance-none
+        relative
+        block
+        w-full
+        px-3
+        py-2
+        border
+        placeholder-gray-500
+        text-gray-900
+        rounded-md
+        focus:outline-none
+        focus:ring-amber-500
+        focus:border-amber-500
+        focus:z-10
+        sm:text-sm
+      "
       :class="[error ? 'border-red-700' : 'border-gray-300']"
       :type="type"
       :placeholder="placeholder"

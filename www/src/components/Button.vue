@@ -3,11 +3,19 @@
     :is="href ? 'a' : 'button'"
     v-bind="$attrs"
     :href="href"
-    class="cursor-pointer border border-transparent font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+    class="
+      cursor-pointer
+      border border-transparent
+      font-medium
+      rounded-md
+      shadow-sm
+      focus:outline-none
+      focus:ring-2 focus:ring-offset-2
+    "
     :class="{
-      'text-white bg-yellow-600 hover:bg-yellow-700  focus:ring-yellow-500':
+      'text-white bg-amber-600 hover:bg-amber-700  focus:ring-amber-500':
         type === 'primary',
-      'text-yellow-600 bg-white hover:bg-yellow-50 focus:ring-yellow-500':
+      'text-amber-600 bg-white hover:bg-amber-50 focus:ring-amber-500':
         type === 'secondary',
 
       'px-4 py-2 text-sm': size === 'sm',

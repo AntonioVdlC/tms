@@ -9,7 +9,7 @@
       {{ " " }}
       <a
         href="/auth/login"
-        class="font-medium text-yellow-600 hover:text-yellow-500"
+        class="font-medium text-amber-600 hover:text-amber-500"
       >
         Sign in
       </a>

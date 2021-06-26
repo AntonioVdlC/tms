@@ -6,10 +6,7 @@
 
   <p v-if="error">
     Oops, an error has occured.<br />Please try
-    <a
-      href="/auth/login"
-      class="cursor-pointer text-yellow-600 hover:underline"
-    >
+    <a href="/auth/login" class="cursor-pointer text-amber-600 hover:underline">
       signing in again.
     </a>
   </p>
