@@ -21,7 +21,7 @@
 
 <script>
 import Logo from "@/components/Logo.vue";
-import MenuItem from "@/components/MenuItem.vue";
+import MenuItem from "@/components/app/MenuItem.vue";
 
 export default {
   components: {

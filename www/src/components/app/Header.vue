@@ -15,9 +15,9 @@
 <script>
 import { mapGetters } from "vuex";
 
-import Breadcrumbs from "@/components/Breadcrumbs.vue";
-import OrganisationSelector from "@/components/OrganisationSelector.vue";
-import ProfilePicture from "@/components/ProfilePicture.vue";
+import Breadcrumbs from "@/components/app/Breadcrumbs.vue";
+import OrganisationSelector from "@/components/app/OrganisationSelector.vue";
+import ProfilePicture from "@/components/app/ProfilePicture.vue";
 
 export default {
   components: {

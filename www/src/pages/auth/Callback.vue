@@ -1,8 +1,12 @@
 <template>
-  <p v-if="!error" class="flex justify-center">
-    <Spinner color="gray-600" />
-    Signing you in ...
-  </p>
+  <div v-if="!error">
+    <template v-if="operation === 'login'">
+      <CallbackLogin :token="token" />
+    </template>
+    <template v-else-if="operation === 'signup'">
+      <CallbackSignup :token="token" />
+    </template>
+  </div>
 
   <p v-if="error">
     Oops, an error has occured.<br />Please try
@@ -14,42 +18,30 @@
 
 <script>
 import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useStore } from "vuex";
+import { useRoute } from "vue-router";
 
-import Spinner from "@/components/Spinner.vue";
+import CallbackLogin from "@/components/auth/CallbackLogin.vue";
+import CallbackSignup from "@/components/auth/CallbackSignup.vue";
 
 export default {
   components: {
-    Spinner,
+    CallbackLogin,
+    CallbackSignup,
   },
   setup() {
-    const route = useRoute();
-    const router = useRouter();
-
-    const store = useStore();
-
     const error = ref(false);
 
+    const route = useRoute();
     const { token, operation } = route.query;
 
     if (!token || !["signup", "login"].includes(operation)) {
       error.value = true;
     }
 
-    if (!error.value) {
-      store
-        .dispatch({ type: "auth/callback", payload: { token, operation } })
-        .then(() => {
-          router.push("/app");
-        })
-        .catch(() => {
-          error.value = true;
-        });
-    }
-
     return {
       error,
+      operation,
+      token,
     };
   },
 };
