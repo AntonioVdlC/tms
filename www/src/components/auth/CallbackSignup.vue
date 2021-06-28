@@ -1,5 +1,20 @@
 <template>
-  <div v-if="!error">
+  <p v-if="loading" class="flex justify-center">
+    <Spinner color="gray-600" />
+    Loading ...
+  </p>
+
+  <p v-else-if="error">
+    Oops, an error has occured.<br />Please try
+    <a
+      href="/auth/signup"
+      class="cursor-pointer text-amber-600 hover:underline"
+    >
+      signing up again.
+    </a>
+  </p>
+
+  <div v-else>
     <div>
       <Logo class="mx-auto h-12 w-auto" type="icon-only" alt="TMS" />
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -28,6 +43,7 @@
       <Button
         class="mt-2 group relative w-full flex justify-center"
         type="primary"
+        :is-loading="isLoadingCreateOrganisation"
         @click="create"
       >
         Create
@@ -41,13 +57,6 @@
       </Button>
     </div>
   </div>
-
-  <p v-if="error">
-    Oops, an error has occured.<br />Please try
-    <a href="/auth/login" class="cursor-pointer text-amber-600 hover:underline">
-      signing in again.
-    </a>
-  </p>
 </template>
 
 <script>
@@ -63,12 +72,14 @@ import {
 import Button from "@/components/Button.vue";
 import Input from "@/components/Input.vue";
 import Logo from "@/components/Logo.vue";
+import Spinner from "@/components/Spinner.vue";
 
 export default {
   components: {
     Button,
     Input,
     Logo,
+    Spinner,
   },
   props: {
     token: {
@@ -82,28 +93,33 @@ export default {
     const store = useStore();
 
     const error = ref(false);
+    const loading = ref(true);
+    const isLoadingCreateOrganisation = ref(false);
     const name = ref("");
 
+    // TODO: Check if the user is signing up from an invite, in which case
+    // we won't display the `Create Organisation` form.
+
+    store
+      .dispatch({
+        type: AUTH_ACTION_CALLBACK,
+        payload: { token: props.token, operation: "signup" },
+      })
+      .catch(() => {
+        error.value = true;
+      })
+      .finally(() => {
+        loading.value = false;
+      });
+
     function skip() {
-      store
-        .dispatch({
-          type: AUTH_ACTION_CALLBACK,
-          payload: { token: props.token, operation: "signup" },
-        })
-        .then(() => {
-          router.push("/app");
-        })
-        .catch(() => {
-          error.value = true;
-        });
+      router.push("/app");
     }
 
     async function create() {
+      isLoadingCreateOrganisation.value = true;
+
       try {
-        await store.dispatch({
-          type: AUTH_ACTION_CALLBACK,
-          payload: { token: props.token, operation: "signup" },
-        });
         await store.dispatch({
           type: ORGANISATION_ACTION_CREATE,
           payload: { organisation_name: name.value },
@@ -112,14 +128,18 @@ export default {
         router.push("/app");
       } catch {
         error.value = true;
+      } finally {
+        isLoadingCreateOrganisation.value = false;
       }
     }
 
     return {
+      loading,
       error,
       name,
       skip,
       create,
+      isLoadingCreateOrganisation,
     };
   },
 };
