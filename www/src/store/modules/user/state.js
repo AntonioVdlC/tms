@@ -1,8 +1,15 @@
+import {
+  USER_KEY_CURRENT,
+  USER_KEY_FEED,
+  USER_KEY_OVERVIEW,
+  USER_KEY_DETAILS,
+} from "@/store/types";
+
 const state = () => ({
-  current: {},
-  feed: [],
-  overview: [],
-  details: {},
+  [USER_KEY_CURRENT]: {},
+  [USER_KEY_FEED]: [],
+  [USER_KEY_OVERVIEW]: [],
+  [USER_KEY_DETAILS]: {},
 });
 
 export default state;

@@ -36,7 +36,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      feed: "user/feed",
+      feed: "g/user/feed",
     }),
   },
   watch: {
@@ -53,7 +53,7 @@ export default {
       this.error = null;
 
       this.$store
-        .dispatch("user/getFeed")
+        .dispatch("a/user/getFeed")
         .catch((err) => {
           this.error = { message: err.message };
         })

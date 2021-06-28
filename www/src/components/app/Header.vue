@@ -4,7 +4,7 @@
     <div class="sm:hidden flex items-center h-14 p-4">
       <Logo type="icon-only" class="h-5" />
       <span class="flex-grow">&nbsp;</span>
-      <OrganisationSelector />
+      <OrganisationSelector :organisations="organisations" />
       <span class="flex-grow">&nbsp;</span>
       <ProfilePicture
         class="cursor-pointer"
@@ -20,7 +20,7 @@
       <Logo type="icon-text" class="h-6" />
       <Breadcrumbs :crumbs="crumbs" />
       <span class="flex-grow">&nbsp;</span>
-      <OrganisationSelector class="mr-8" />
+      <OrganisationSelector class="mr-8" :organisations="organisations" />
       <ProfilePicture
         class="cursor-pointer"
         :user="user"

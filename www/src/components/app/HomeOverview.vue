@@ -38,7 +38,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      overview: "user/overview",
+      overview: "g/user/overview",
     }),
   },
   watch: {
@@ -55,7 +55,7 @@ export default {
       this.error = null;
 
       this.$store
-        .dispatch("user/getOverview")
+        .dispatch("a/user/getOverview")
         .catch((err) => {
           this.error = { message: err.message };
         })

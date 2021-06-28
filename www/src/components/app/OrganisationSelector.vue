@@ -1,40 +1,59 @@
 <template>
   <div>
-    <select v-model="value">
-      <option v-for="org in list" :key="org.id" :value="org.id">
-        {{ org.organisation_name }}
-      </option>
-      <option value="new">{{ "Create" }}</option>
-    </select>
+    <Select
+      v-model:value="selectedOrganisation"
+      :options="optionsOrganisations"
+    />
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { ref, watch } from "vue";
+import { useStore } from "vuex";
+
+import {
+  ORGANISATION_GETTER_CURRENT,
+  ORGANISATION_ACTION_UPDATE_CURRENT,
+} from "@/store/types";
+
+import Select from "@/components/Select.vue";
 
 export default {
-  computed: {
-    ...mapGetters({
-      user: "user/current",
-      list: "organisation/list",
-    }),
-    value: {
-      get() {
-        return this.user?.organisation?.id;
-      },
-      set(id) {
-        // TODO: refresh the whole app!
-        this.$store.dispatch({ type: "organisation/update", payload: { id } });
-      },
+  components: {
+    Select,
+  },
+  props: {
+    organisations: {
+      type: Array,
+      default: () => [],
     },
   },
-  created() {
-    this.fetchData();
-  },
-  methods: {
-    fetchData() {
-      this.$store.dispatch("organisation/getList");
-    },
+  setup(props) {
+    const store = useStore();
+
+    const selectedOrganisation = ref(
+      store.getters[ORGANISATION_GETTER_CURRENT]
+    );
+    watch(selectedOrganisation, (newValue) => {
+      store.dispatch({
+        type: ORGANISATION_ACTION_UPDATE_CURRENT,
+        payload: { id: newValue },
+      });
+    });
+
+    const optionsOrganisations =
+      props.organisations?.map((org) => ({
+        value: org.id,
+        label: org.organisation_name,
+      })) ?? [];
+
+    // TODO: implement a way to create new organisations, maybe in Settings?
+    // optionsOrganisations.push({ value: "new", label: "Create" });
+
+    return {
+      selectedOrganisation,
+      optionsOrganisations,
+    };
   },
 };
 </script>
