@@ -1,35 +1,49 @@
 <template>
-  <div v-if="!error">
-    <template v-if="operation === 'login'">
-      <CallbackLogin :token="token" />
-    </template>
-    <template v-else-if="operation === 'signup'">
-      <CallbackSignup :token="token" />
-    </template>
-  </div>
+  <p v-if="loading" class="flex justify-center">
+    <Spinner color="gray-600" />
+    Signing you in ...
+  </p>
 
-  <p v-if="error">
+  <p v-else-if="error">
     Oops, an error has occured.<br />Please try
-    <a href="/auth/login" class="cursor-pointer text-amber-600 hover:underline">
+    <a
+      :href="`/auth/${operation}`"
+      class="cursor-pointer text-amber-600 hover:underline"
+    >
       signing in again.
     </a>
   </p>
+
+  <div v-else>
+    <template v-if="operation === 'login'">
+      <CallbackLoginForm :token="token" />
+    </template>
+    <template v-else-if="operation === 'signup'">
+      <CallbackSignupForm :token="token" />
+    </template>
+  </div>
 </template>
 
 <script>
 import { ref } from "vue";
 import { useRoute } from "vue-router";
+import { useStore } from "vuex";
 
-import CallbackLogin from "@/components/auth/CallbackLogin.vue";
-import CallbackSignup from "@/components/auth/CallbackSignup.vue";
+import { AUTH_ACTION_CALLBACK, USER_ACTION_GET_CURRENT } from "@/store/types";
+
+import CallbackLoginForm from "@/components/auth/CallbackLoginForm.vue";
+import CallbackSignupForm from "@/components/auth/CallbackSignupForm.vue";
 
 export default {
   components: {
-    CallbackLogin,
-    CallbackSignup,
+    CallbackLoginForm,
+    CallbackSignupForm,
   },
   setup() {
     const error = ref(false);
+    const loading = ref(true);
+
+    const store = useStore();
 
     const route = useRoute();
     const { token, operation } = route.query;
@@ -38,8 +52,28 @@ export default {
       error.value = true;
     }
 
+    if (!error.value) {
+      store
+        .dispatch({
+          type: AUTH_ACTION_CALLBACK,
+          payload: { token, operation },
+        })
+        .then(() =>
+          store.dispatch({
+            type: USER_ACTION_GET_CURRENT,
+          })
+        )
+        .catch(() => {
+          error.value = true;
+        })
+        .finally(() => {
+          loading.value = false;
+        });
+    }
+
     return {
       error,
+      loading,
       operation,
       token,
     };

@@ -1,10 +1,5 @@
 <template>
-  <p v-if="loading" class="flex justify-center">
-    <Spinner color="gray-600" />
-    Loading ...
-  </p>
-
-  <p v-else-if="error">
+  <p v-if="error">
     Oops, an error has occured.<br />Please try
     <a
       href="/auth/signup"
@@ -64,53 +59,29 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
-import {
-  AUTH_ACTION_CALLBACK,
-  ORGANISATION_ACTION_CREATE,
-} from "@/store/types";
+import { ORGANISATION_ACTION_CREATE } from "@/store/types";
 
 import Button from "@/components/Button.vue";
 import Input from "@/components/Input.vue";
 import Logo from "@/components/Logo.vue";
-import Spinner from "@/components/Spinner.vue";
 
 export default {
   components: {
     Button,
     Input,
     Logo,
-    Spinner,
   },
-  props: {
-    token: {
-      type: String,
-      required: true,
-    },
-  },
-  setup(props) {
+  setup() {
     const router = useRouter();
 
     const store = useStore();
 
     const error = ref(false);
-    const loading = ref(true);
     const isLoadingCreateOrganisation = ref(false);
     const name = ref("");
 
     // TODO: Check if the user is signing up from an invite, in which case
     // we won't display the `Create Organisation` form.
-
-    store
-      .dispatch({
-        type: AUTH_ACTION_CALLBACK,
-        payload: { token: props.token, operation: "signup" },
-      })
-      .catch(() => {
-        error.value = true;
-      })
-      .finally(() => {
-        loading.value = false;
-      });
 
     function skip() {
       router.push("/app");
@@ -134,7 +105,6 @@ export default {
     }
 
     return {
-      loading,
       error,
       name,
       skip,
