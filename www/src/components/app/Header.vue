@@ -17,7 +17,7 @@
 
     <!-- Desktop -->
     <div class="hidden sm:flex items-center h-14 p-4">
-      <Logo type="icon-text" class="h-5" />
+      <Logo type="icon-text" class="h-6" />
       <Breadcrumbs :crumbs="crumbs" />
       <span class="flex-grow">&nbsp;</span>
       <OrganisationSelector class="mr-8" />

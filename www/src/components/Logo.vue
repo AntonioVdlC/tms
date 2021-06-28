@@ -3,8 +3,8 @@
 </template>
 
 <script>
-import logoIconText from "@/assets/logo.png";
-import logoIconOnly from "@/assets/logo_icon.png";
+import logoIconText from "@/assets/logo.svg";
+import logoIconOnly from "@/assets/logo_icon.svg";
 
 export default {
   props: {

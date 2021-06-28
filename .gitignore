@@ -15,3 +15,5 @@ build/
 
 .vscode
 vetur.config.js
+
+.DS_Store
