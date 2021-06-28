@@ -32,14 +32,14 @@ export default {
   },
   setup(props) {
     const src = computed(() => {
-      if (props.user.picture) {
+      if (props.user?.picture) {
         return props.user.picture;
       }
       return DEFAULT_PROFILE_PICTURE;
     });
 
     const alt = computed(() => {
-      if (props.user.name) {
+      if (props.user?.name) {
         return props.user.name;
       }
       return "Your Profile";

@@ -1,9 +1,10 @@
 <template>
-  <div v-if="list.length > 1">
+  <div>
     <select v-model="value">
       <option v-for="org in list" :key="org.id" :value="org.id">
-        {{ org.name }}
+        {{ org.organisation_name }}
       </option>
+      <option value="new">{{ "Create" }}</option>
     </select>
   </div>
 </template>
@@ -19,7 +20,7 @@ export default {
     }),
     value: {
       get() {
-        return this.user.organisation.id;
+        return this.user?.organisation?.id;
       },
       set(id) {
         // TODO: refresh the whole app!

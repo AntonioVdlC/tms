@@ -1,16 +1,17 @@
 <template>
   <nav
     class="
-      flex flex-col
+      hidden
+      sm:flex
+      flex-col
       h-screen
       w-40
-      pt-4
+      pt-16
       pb-4
-      bg-green-600
+      bg-amber-600
       text-white text-left
     "
   >
-    <Logo type="icon-only" />
     <MenuItem
       v-for="(item, index) in items"
       :key="`menu-item-${index}`"
@@ -20,12 +21,10 @@
 </template>
 
 <script>
-import Logo from "@/components/Logo.vue";
 import MenuItem from "@/components/app/MenuItem.vue";
 
 export default {
   components: {
-    Logo,
     MenuItem,
   },
   props: {

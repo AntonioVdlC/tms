@@ -29,7 +29,7 @@ import { ref } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 
-import { AUTH_ACTION_CALLBACK, USER_ACTION_GET_CURRENT } from "@/store/types";
+import { AUTH_ACTION_CALLBACK } from "@/store/types";
 
 import CallbackLoginForm from "@/components/auth/CallbackLoginForm.vue";
 import CallbackSignupForm from "@/components/auth/CallbackSignupForm.vue";
@@ -58,11 +58,6 @@ export default {
           type: AUTH_ACTION_CALLBACK,
           payload: { token, operation },
         })
-        .then(() =>
-          store.dispatch({
-            type: USER_ACTION_GET_CURRENT,
-          })
-        )
         .catch(() => {
           error.value = true;
         })
