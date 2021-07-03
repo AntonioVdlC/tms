@@ -1,91 +1,34 @@
 <template>
-  <ul class="flex justify-between">
-    <li
-      v-for="project in projects"
-      :key="project.id"
-      class="flex-grow m-2 flex flex-col items-center cursor-pointer"
-      @click="goTo(project)"
-    >
-      <span
-        class="border border-gray-600 bg-gray-300 h-40 w-60 hover:bg-gray-200"
-      ></span>
-      <span class="border border-t-0 border-gray-600 p-2 w-60 text-lg">{{
-        project.name
-      }}</span>
-    </li>
-    <li
-      class="flex-grow m-2 flex flex-col items-center cursor-pointer"
-      @click="createNewProject()"
-    >
-      <span
-        class="
-          border border-gray-600
-          bg-gray-300
-          h-40
-          w-60
-          hover:bg-gray-200
-          flex
-          items-center
-          justify-center
-          text-white
-          font-extrabold
-          text-6xl
-          hover:text-black
-        "
-      >
-        +
-      </span>
-      <span class="border border-t-0 border-gray-600 p-2 w-60 text-lg">
-        New Project
-      </span>
-    </li>
-  </ul>
+  <div v-if="loading">Loading</div>
+  <div v-else-if="!list.length">No data</div>
+  <div v-else>
+    <div v-for="project in list" :key="project.id">
+      {{ project.id }}
+    </div>
+  </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { computed, ref } from "vue";
+import { useStore } from "vuex";
+
+import { PROJECT_ACTION_GET_LIST, PROJECT_GETTER_LIST } from "@/store/types";
 
 export default {
-  data() {
-    return {
-      loading: true,
-      error: null,
-    };
-  },
-  computed: {
-    ...mapGetters({
-      projects: "project/list",
-      user: "user/current",
-    }),
-  },
-  watch: {
-    $router: {
-      immediate: true,
-      handler() {
-        this.fetchData();
-      },
-    },
-  },
-  methods: {
-    fetchData() {
-      this.loading = true;
-      this.error = null;
+  setup() {
+    const store = useStore();
+    const loading = ref(true);
 
-      this.$store
-        .dispatch("project/getList")
-        .catch((err) => {
-          this.error = { message: err.message };
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    createNewProject() {
-      // TODO
-    },
-    goTo(project) {
-      this.$router.push(`/app/project/${project.id}`);
-    },
+    store.dispatch({ type: PROJECT_ACTION_GET_LIST }).finally(() => {
+      loading.value = false;
+    });
+
+    const list = computed(() => store.getters[PROJECT_GETTER_LIST]);
+
+    return {
+      loading,
+      list,
+    };
   },
 };
 </script>

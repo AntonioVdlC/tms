@@ -10,6 +10,8 @@
       rounded-md
       shadow-sm
       focus:outline-none focus:ring-2 focus:ring-offset-2
+      max-h-12
+      text-center
     "
     :class="{
       'text-white bg-amber-600 hover:bg-amber-700  focus:ring-amber-500':

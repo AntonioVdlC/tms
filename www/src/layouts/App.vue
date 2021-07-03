@@ -20,12 +20,7 @@
   </div>
 
   <div v-else>
-    <Header
-      :user="user"
-      :organisations="organisations"
-      :crumbs="crumbs"
-      class="fixed z-10"
-    />
+    <Header :user="user" :organisations="organisations" class="fixed z-10" />
     <Menu :items="menu" class="fixed" />
     <main class="p-4 sm:pl-48 pt-16 pb-16 sm:pb-4 min-h-screen bg-gray-50">
       <router-view></router-view>
@@ -70,7 +65,6 @@ export default {
   },
   setup() {
     const loading = ref(true);
-    const crumbs = ref([]); // TODO
 
     const store = useStore();
     Promise.all([
@@ -107,7 +101,6 @@ export default {
 
     return {
       loading,
-      crumbs,
       menu,
       user,
       organisations,

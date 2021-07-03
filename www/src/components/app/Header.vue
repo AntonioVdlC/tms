@@ -18,7 +18,7 @@
     <!-- Desktop -->
     <div class="hidden sm:flex items-center h-14 p-4">
       <Logo type="icon-text" class="h-6" />
-      <Breadcrumbs :crumbs="crumbs" />
+      <Breadcrumbs class="ml-8" />
       <span class="flex-grow">&nbsp;</span>
       <OrganisationSelector class="mr-8" :organisations="organisations" />
       <ProfilePicture
@@ -53,10 +53,6 @@ export default {
       required: true,
     },
     organisations: {
-      type: Array,
-      default: () => [],
-    },
-    crumbs: {
       type: Array,
       default: () => [],
     },

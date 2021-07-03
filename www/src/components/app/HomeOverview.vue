@@ -22,7 +22,7 @@ import { mapGetters } from "vuex";
 
 import Error from "@/components/Error.vue";
 import Loading from "@/components/Loading.vue";
-import SectionTitle from "@/components/app/SectionTitle.vue";
+import SectionTitle from "@/components/app/CardTitle.vue";
 
 export default {
   components: {
