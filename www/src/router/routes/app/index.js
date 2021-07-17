@@ -31,13 +31,13 @@ const routes = [
         component: () => import("@/pages/app/ProjectsCreate.vue"),
       },
       {
-        path: "/app/project/:projectId",
+        path: "/app/projects/:projectId",
         props: true,
         name: "Project",
         component: () => import("@/pages/app/Project.vue"),
       },
       {
-        path: "/app/project/:projectId/segment/:segmentId",
+        path: "/app/projects/:projectId/segment/:segmentId",
         props: true,
         name: "Segment",
         component: () => import("@/pages/app/Segment.vue"),
