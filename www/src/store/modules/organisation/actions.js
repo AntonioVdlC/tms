@@ -23,7 +23,7 @@ const actions = {
     { payload: { organisation_name } }
   ) {
     return api.post(`/organisations`, { organisation_name }).then((res) => {
-      const list = Array.from(state.list);
+      const list = Array.from(state[ORGANISATION_KEY_LIST]);
 
       list.push(res.data);
 

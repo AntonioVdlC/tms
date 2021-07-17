@@ -1,6 +1,8 @@
+import { PROJECT_KEY_LIST, PROJECT_KEY_DETAILS } from "@/store/types";
+
 const state = () => ({
-  list: [],
-  details: {},
+  [PROJECT_KEY_LIST]: [],
+  [PROJECT_KEY_DETAILS]: {},
 });
 
 export default state;

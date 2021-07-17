@@ -22,6 +22,9 @@
       'px-4 py-2 text-sm': size === 'sm',
       'px-5 py-3 text-base': size === 'md',
       'px-8 py-3 md:py-4 md:text-lg md:px-10': size === 'lg',
+
+      'cursor-not-allowed': disabled,
+      'cursor-wait': isLoading,
     }"
     :disabled="disabled || isLoading"
   >
