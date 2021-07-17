@@ -35,6 +35,7 @@
       @focus="onFocus"
     />
     <p
+      v-if="required"
       class="text-red-700 text-xs mt-0.5 ml-1.5"
       :class="{ invisible: !error }"
     >
@@ -103,7 +104,7 @@ export default {
     }
 
     function onBlur(e) {
-      if (!props.value) {
+      if (props.required && !props.value) {
         error.value = true;
       }
 
