@@ -39,6 +39,7 @@ export default {
         type: ORGANISATION_ACTION_UPDATE_CURRENT,
         payload: { id: newValue },
       });
+      // TODO: fetch all relevant data for the new organisation (projects, segments, members, ...)
     });
 
     const optionsOrganisations =

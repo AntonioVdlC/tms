@@ -37,6 +37,7 @@ import { computed, ref } from "vue";
 import { useStore } from "vuex";
 
 import {
+  PROJECT_ACTION_GET_LIST,
   ORGANISATION_ACTION_GET_LIST,
   ORGANISATION_GETTER_LIST,
   USER_ACTION_GET_CURRENT,
@@ -70,9 +71,14 @@ export default {
     Promise.all([
       store.dispatch({ type: USER_ACTION_GET_CURRENT }),
       store.dispatch({ type: ORGANISATION_ACTION_GET_LIST }),
-    ]).finally(() => {
-      loading.value = false;
-    });
+    ])
+      .then(() =>
+        // TODO: add more initialisation actions that depend on organisation
+        Promise.all([store.dispatch({ type: PROJECT_ACTION_GET_LIST })])
+      )
+      .finally(() => {
+        loading.value = false;
+      });
 
     const user = computed(() => store.getters[USER_GETTER_CURRENT]);
     const organisations = computed(

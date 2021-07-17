@@ -14,7 +14,17 @@
       <li
         v-for="project in list"
         :key="project.project_id"
-        class="inline-block text-center w-1/2 sm:w-1/3 px-2 mb-4"
+        class="
+          inline-block
+          text-center
+          w-1/2
+          sm:w-1/3
+          lg:w-1/4
+          xl:w-1/5
+          2xl:w-1/6
+          px-2
+          mb-4
+        "
       >
         <div
           class="
