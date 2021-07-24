@@ -113,7 +113,7 @@ export default {
     function onFocus(e) {
       error.value = false;
 
-      emit("blur", e);
+      emit("focus", e);
     }
 
     return {
