@@ -106,9 +106,9 @@
           @click="() => onMemberRemoved(member)"
           @keyup.enter="() => onMemberRemoved(member)"
         >
-          <span class="mr-1"
-            >{{ member.first_name }}{{ " " }}{{ member.last_name }}</span
-          >
+          <span class="mr-1">
+            {{ member.first_name }}{{ " " }}{{ member.last_name }}
+          </span>
           <XIcon class="h-3 inline cursor-pointer" />
         </span>
       </div>
