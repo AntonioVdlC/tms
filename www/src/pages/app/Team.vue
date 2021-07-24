@@ -85,20 +85,80 @@
     <!-- Members -->
     <CardTitle>Members</CardTitle>
     <CardContent>
-      <ul class="w-full">
-        <li class="grid grid-cols-12 gap-4 font-bold">
-          <span class="col-span-3">Name</span>
-          <span class="col-span-3">Email</span>
-          <span class="col-span-2">Role</span>
-          <span class="col-span-3">Projects</span>
-          <span>Status</span>
+      <transition-group name="members-list" class="w-full" tag="ul">
+        <li
+          key="top-menu"
+          class="
+            hidden
+            lg:border-grey-500
+            lg:border-b
+            lg:pb-2
+            lg:grid
+            lg:grid-cols-12
+            lg:gap-4
+            lg:font-bold
+          "
+        >
+          <span
+            class="lg:col-span-3 cursor-pointer"
+            tabindex="0"
+            @click="updateSort('sort_key')"
+            @keyup.enter="updateSort('sort_key')"
+          >
+            Name
+            <component
+              :is="
+                sortDirection === 'asc' ? 'ChevronDownIcon' : 'ChevronUpIcon'
+              "
+              v-show="sortKey === 'sort_key'"
+              class="h-3 ml-1 inline"
+            />
+          </span>
+          <span class="lg:col-span-3">Email</span>
+          <span
+            class="cursor-pointer"
+            tabindex="0"
+            @click="updateSort('role')"
+            @keyup.enter="updateSort('role')"
+          >
+            Role
+            <component
+              :is="
+                sortDirection === 'asc' ? 'ChevronDownIcon' : 'ChevronUpIcon'
+              "
+              v-show="sortKey === 'role'"
+              class="h-3 ml-1 inline"
+            />
+          </span>
+          <span class="lg:col-span-3">Projects</span>
+          <span
+            class="cursor-pointer"
+            tabindex="0"
+            @click="updateSort('status')"
+            @keyup.enter="updateSort('status')"
+          >
+            Status
+            <component
+              :is="
+                sortDirection === 'asc' ? 'ChevronDownIcon' : 'ChevronUpIcon'
+              "
+              v-show="sortKey === 'status'"
+              class="h-3 ml-1 inline"
+            />
+          </span>
+          <span>Actions</span>
         </li>
         <li
           v-for="member in members"
-          :key="member._id"
-          class="grid grid-cols-12 gap-4 h-12"
+          :key="member.id"
+          class="
+            flex flex-wrap
+            border-grey-500 border-b
+            h-16
+            lg:grid lg:grid-cols-12 lg:gap-4
+          "
         >
-          <span class="col-span-3 flex items-center">
+          <span class="flex-grow lg:col-span-3 flex items-center">
             <ProfilePicture
               v-if="member.first_name + member.last_name"
               :user="member"
@@ -115,12 +175,15 @@
               <span v-else>-</span>
             </span>
           </span>
-          <span class="col-span-3 flex items-center">{{ member.email }}</span>
-          <span class="col-span-2 flex items-center">{{ member.role }}</span>
-          <span class="col-span-3"></span>
-          <span class="flex items-center">{{ member.status }}</span>
+          <span class="flex-grow lg:col-span-3 flex items-center">{{
+            member.email
+          }}</span>
+          <span class="flex-grow flex items-center">{{ member.role }}</span>
+          <span class="flex-grow lg:col-span-3"></span>
+          <span class="flex-grow flex items-center">{{ member.status }}</span>
+          <span class="flex-grow flex items-center"></span>
         </li>
-      </ul>
+      </transition-group>
     </CardContent>
   </div>
 </template>
@@ -142,7 +205,7 @@ import {
   ORGANISATION_GETTER_LIST,
 } from "@/store/types";
 
-import { XIcon } from "@heroicons/vue/solid";
+import { ChevronDownIcon, ChevronUpIcon, XIcon } from "@heroicons/vue/solid";
 
 import CardContent from "@/components/app/CardContent.vue";
 import CardTitle from "@/components/app/CardTitle.vue";
@@ -157,6 +220,8 @@ import Space from "@/components/Space.vue";
 
 export default {
   components: {
+    ChevronDownIcon,
+    ChevronUpIcon,
     XIcon,
 
     CardContent,
@@ -254,6 +319,8 @@ export default {
     ]).finally(() => {
       loadingMembers.value = false;
     });
+    const sortKey = ref("sort_key");
+    const sortDirection = ref("asc");
     const members = computed(() =>
       [
         ...store.getters[MEMBER_GETTER_LIST].map((member) => ({
@@ -273,11 +340,25 @@ export default {
             .label,
           status: "Invited",
         })),
-      ].sort(alphabetically("sort_key"))
+      ].sort(alphabetically(sortKey.value, sortDirection.value))
     );
 
+    function sortMembersList(key, direction) {
+      sortKey.value = key;
+      sortDirection.value = direction;
+    }
+
+    function updateSort(key) {
+      if (sortKey.value === key) {
+        sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+        return;
+      }
+      sortKey.value = key;
+      sortDirection.value = "asc";
+    }
+
     function goToProfile(member) {
-      router.push(`/app/profile/${member._id}`);
+      router.push(`/app/profile/${member.id}`);
     }
 
     return {
@@ -295,8 +376,18 @@ export default {
 
       loadingMembers,
       members,
+      sortKey,
+      sortDirection,
+      sortMembersList,
+      updateSort,
       goToProfile,
     };
   },
 };
 </script>
+
+<style scoped>
+.members-list-move {
+  transition: transform 0.5s ease;
+}
+</style>
