@@ -21,6 +21,8 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
+import { AUTH_ACTION_LOGOUT } from "@/store/types";
+
 import Spinner from "@/components/Spinner.vue";
 
 export default {
@@ -35,7 +37,7 @@ export default {
 
     function logout() {
       store
-        .dispatch({ type: "auth/logout" })
+        .dispatch({ type: AUTH_ACTION_LOGOUT })
         .then(() => {
           router.replace("/");
         })
@@ -48,7 +50,6 @@ export default {
 
     return {
       error,
-
       logout,
     };
   },

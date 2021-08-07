@@ -9,7 +9,12 @@
     </a>
   </p>
 
-  <div v-else>
+  <p v-else-if="isLoadingOrganisationGetList" class="flex justify-center">
+    <Spinner color="gray-600" />
+    Signing you up ...
+  </p>
+
+  <div v-else-if="!organisations.length">
     <div>
       <Logo class="mx-auto h-12 w-auto" type="icon-only" alt="TMS" />
       <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -55,21 +60,27 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
-import { ORGANISATION_ACTION_CREATE } from "@/store/types";
+import {
+  ORGANISATION_ACTION_CREATE,
+  ORGANISATION_ACTION_GET_LIST,
+  ORGANISATION_GETTER_LIST,
+} from "@/store/types";
 
 import Button from "@/components/Button.vue";
 import Input from "@/components/Input.vue";
 import Logo from "@/components/Logo.vue";
+import Spinner from "@/components/Spinner.vue";
 
 export default {
   components: {
     Button,
     Input,
     Logo,
+    Spinner,
   },
   setup() {
     const router = useRouter();
@@ -80,8 +91,25 @@ export default {
     const isLoadingCreateOrganisation = ref(false);
     const name = ref("");
 
-    // TODO: Check if the user is signing up from an invite, in which case
+    // Check if the user is signing up from an invite, in which case
     // we won't display the `Create Organisation` form.
+    const isLoadingOrganisationGetList = ref(true);
+    store
+      .dispatch({ type: ORGANISATION_ACTION_GET_LIST })
+      .catch(() => {
+        error.value = true;
+      })
+      .finally(() => {
+        isLoadingOrganisationGetList.value = false;
+      });
+
+    const organisations = computed(
+      () => store.getters[ORGANISATION_GETTER_LIST]
+    );
+
+    if (organisations.value.length) {
+      skip();
+    }
 
     function skip() {
       router.push("/app");
@@ -106,6 +134,8 @@ export default {
 
     return {
       error,
+      isLoadingOrganisationGetList,
+      organisations,
       name,
       skip,
       create,

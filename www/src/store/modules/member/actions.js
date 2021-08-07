@@ -21,7 +21,10 @@ const actions = {
     const orgId = rootGetters[ORGANISATION_GETTER_CURRENT];
 
     return api.get(`/organisations/${orgId}/members/invites`).then((res) => {
-      commit("update", { key: MEMBER_KEY_INVITES, value: res.data });
+      commit("update", {
+        key: MEMBER_KEY_INVITES,
+        value: res.data?.filter?.((user) => !user.is_deleted),
+      });
     });
   },
   [MEMBER_ACTION_CREATE](

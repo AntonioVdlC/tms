@@ -50,6 +50,7 @@ import {
   UserGroupIcon,
   CreditCardIcon,
   CogIcon,
+  LogoutIcon,
 } from "@heroicons/vue/solid";
 
 import BottomNav from "@/components/app/BottomNav.vue";
@@ -88,6 +89,7 @@ export default {
     // TODO: build menu depending on current organisation and user role
     const menu = computed(() => {
       let tempMenu = [];
+
       tempMenu.push({ name: "Home", icon: HomeIcon, path: "/app" });
       tempMenu.push({
         name: "Projects",
@@ -95,13 +97,17 @@ export default {
         path: "/app/projects",
       });
       tempMenu.push({ name: "Team", icon: UserGroupIcon, path: "/app/team" });
+
       tempMenu.push({ type: "space" });
+
       tempMenu.push({
         name: "Billing",
         icon: CreditCardIcon,
         path: "/app/billing",
       });
       tempMenu.push({ name: "Settings", icon: CogIcon, path: "/app/settings" });
+      tempMenu.push({ name: "Logout", icon: LogoutIcon, path: "/auth/logout" });
+
       return tempMenu;
     });
 
