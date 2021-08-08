@@ -37,6 +37,7 @@ import { computed, ref } from "vue";
 import { useStore } from "vuex";
 
 import {
+  MEMBER_ACTION_GET_LIST,
   PROJECT_ACTION_GET_LIST,
   ORGANISATION_ACTION_GET_LIST,
   ORGANISATION_GETTER_LIST,
@@ -75,7 +76,11 @@ export default {
     ])
       .then(() =>
         // TODO: add more initialisation actions that depend on organisation
-        Promise.all([store.dispatch({ type: PROJECT_ACTION_GET_LIST })])
+        Promise.all([
+          store.dispatch({ type: PROJECT_ACTION_GET_LIST }),
+          // TODO: Surface an API endpoint to get details of a single member?
+          store.dispatch({ type: MEMBER_ACTION_GET_LIST }),
+        ])
       )
       .finally(() => {
         loading.value = false;

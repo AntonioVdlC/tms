@@ -33,12 +33,15 @@
 </template>
 
 <script>
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useStore } from "vuex";
 
 import Breadcrumbs from "@/components/app/Breadcrumbs.vue";
 import Logo from "@/components/Logo.vue";
 import OrganisationSelector from "@/components/app/OrganisationSelector.vue";
 import ProfilePicture from "@/components/app/ProfilePicture.vue";
+import { USER_GETTER_CURRENT } from "@/store/types";
 
 export default {
   components: {
@@ -48,10 +51,6 @@ export default {
     ProfilePicture,
   },
   props: {
-    user: {
-      type: Object,
-      required: true,
-    },
     organisations: {
       type: Array,
       default: () => [],
@@ -61,15 +60,20 @@ export default {
     const route = useRoute();
     const router = useRouter();
 
+    const store = useStore();
+
+    const user = computed(() => store.getters[USER_GETTER_CURRENT]);
+
     function goToProfile() {
-      if (route.name === "Profile") {
+      if (route.path === `/app/team/${user.value.id}`) {
         return;
       }
 
-      router.push(`/app/profile/${this.user.id}`);
+      router.push(`/app/team/${user.value.id}`);
     }
 
     return {
+      user,
       goToProfile,
     };
   },

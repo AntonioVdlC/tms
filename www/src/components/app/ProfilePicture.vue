@@ -15,6 +15,7 @@
       'h-8 w-8 text-lg': size === 's',
       'h-10 w-10 text-xl': size === 'm',
       'h-14 w-14 text-2xl': size === 'l',
+      'h-20 w-20 text-4xl': size === 'xl',
     }"
     :style="`background-color: ${color};`"
   >
@@ -35,7 +36,7 @@ export default {
     },
     size: {
       type: String,
-      validator: (size) => ["s", "m", "l"].includes(size),
+      validator: (size) => ["s", "m", "l", "xl"].includes(size),
       default: "m",
     },
   },

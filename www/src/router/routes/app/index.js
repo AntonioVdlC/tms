@@ -10,7 +10,7 @@ const routes = [
         component: () => import("@/pages/app/Home.vue"),
       },
       {
-        path: "/app/profile/:userId",
+        path: "/app/team/:userId",
         props: true,
         name: "Profile",
         component: () => import("@/pages/app/Profile.vue"),

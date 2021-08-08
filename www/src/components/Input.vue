@@ -29,6 +29,7 @@
       :class="[error ? 'border-red-700' : 'border-gray-300']"
       :type="type"
       :placeholder="placeholder"
+      :disabled="disabled"
       :value="value"
       @input="$emit('update:value', $event.target.value)"
       @blur="onBlur"
@@ -74,6 +75,10 @@ export default {
     type: {
       type: String,
       default: "text",
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
     required: {
       type: Boolean,

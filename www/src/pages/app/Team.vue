@@ -4,10 +4,8 @@
     <CardContent>
       <p>
         You can invite an unlimited numbers of colleagues to
-        <HighlightText>{{
-          currentOrganistion.organisation_name
-        }}</HighlightText>
-        .
+        <HighlightText>{{ currentOrganistion.organisation_name }}</HighlightText
+        >.
       </p>
       <div class="mt-4">
         <div class="sm:flex sm:items-center">
@@ -146,7 +144,7 @@
               class="h-3 ml-1 inline"
             />
           </span>
-          <span>Actions</span>
+          <span></span>
         </li>
         <li
           v-for="member in members"
@@ -181,7 +179,14 @@
           <span class="flex-grow flex items-center">{{ member.role }}</span>
           <span class="flex-grow lg:col-span-3"></span>
           <span class="flex-grow flex items-center">{{ member.status }}</span>
-          <span class="flex-grow flex items-center"></span>
+          <span class="flex items-center justify-center">
+            <PencilIcon
+              class="h-3 inline cursor-pointer"
+              tabindex="0"
+              @click="goToProfile(member)"
+              @keyup.enter="goToProfile(member)"
+            />
+          </span>
         </li>
       </transition-group>
     </CardContent>
@@ -205,7 +210,12 @@ import {
   ORGANISATION_GETTER_LIST,
 } from "@/store/types";
 
-import { ChevronDownIcon, ChevronUpIcon, XIcon } from "@heroicons/vue/solid";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  PencilIcon,
+  XIcon,
+} from "@heroicons/vue/solid";
 
 import CardContent from "@/components/app/CardContent.vue";
 import CardTitle from "@/components/app/CardTitle.vue";
@@ -222,6 +232,7 @@ export default {
   components: {
     ChevronDownIcon,
     ChevronUpIcon,
+    PencilIcon,
     XIcon,
 
     CardContent,
@@ -309,6 +320,11 @@ export default {
       ).finally(() => {
         invitees.value = [];
         sendingInvites.value = false;
+
+        Promise.all([
+          store.dispatch({ type: MEMBER_ACTION_GET_LIST }),
+          store.dispatch({ type: MEMBER_ACTION_GET_INVITES }),
+        ]);
       });
     }
 
@@ -358,7 +374,7 @@ export default {
     }
 
     function goToProfile(member) {
-      router.push(`/app/profile/${member.id}`);
+      router.push(`/app/team/${member.id}`);
     }
 
     return {
